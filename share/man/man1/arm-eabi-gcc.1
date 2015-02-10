@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GCC 1"
-.TH GCC 1 "2014-04-01" "gcc-4.8.3" "GNU"
+.TH GCC 1 "2015-02-08" "gcc-4.8.5" "GNU"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -448,7 +448,7 @@ in the following sections.
 \&\-ftree\-parallelize\-loops=\fR\fIn\fR \fB\-ftree\-pre \-ftree\-partial\-pre \-ftree\-pta 
 \&\-ftree\-reassoc \-ftree\-sink \-ftree\-slsr \-ftree\-sra 
 \&\-ftree\-switch\-conversion \-ftree\-tail\-merge 
-\&\-ftree\-ter \-ftree\-vectorize \-ftree\-vrp 
+\&\-ftree\-ter \-ftree\-vect\-loop\-version \-ftree\-vectorize \-ftree\-vrp 
 \&\-funit\-at\-a\-time \-funroll\-all\-loops \-funroll\-loops 
 \&\-funsafe\-loop\-optimizations \-funsafe\-math\-optimizations \-funswitch\-loops 
 \&\-fvariable\-expansion\-in\-unroller \-fvect\-cost\-model \-fvpt \-fweb 
@@ -496,6 +496,7 @@ in the following sections.
 \&\-mstrict\-align 
 \&\-momit\-leaf\-frame\-pointer  \-mno\-omit\-leaf\-frame\-pointer 
 \&\-mtls\-dialect=desc  \-mtls\-dialect=traditional 
+\&\-mfix\-cortex\-a53\-835769  \-mno\-fix\-cortex\-a53\-835769 
 \&\-march=\fR\fIname\fR  \fB\-mcpu=\fR\fIname\fR  \fB\-mtune=\fR\fIname\fR
 .Sp
 \&\fIAdapteva Epiphany Options\fR
@@ -531,9 +532,7 @@ in the following sections.
 \&\-mtp=\fR\fIname\fR \fB\-mtls\-dialect=\fR\fIdialect\fR 
 \&\fB\-mword\-relocations 
 \&\-mfix\-cortex\-m3\-ldrd 
-\&\-munaligned\-access 
-\&\-mneon\-for\-64bits 
-\&\-mrestrict\-it\fR
+\&\-munaligned\-access\fR
 .Sp
 \&\fI\s-1AVR\s0 Options\fR
 \&\fB\-mmcu=\fR\fImcu\fR \fB\-maccumulate\-args \-mbranch\-cost=\fR\fIcost\fR 
@@ -670,7 +669,7 @@ in the following sections.
 \&\-mno\-align\-stringops  \-minline\-all\-stringops 
 \&\-minline\-stringops\-dynamically \-mstringop\-strategy=\fR\fIalg\fR 
 \&\fB\-mpush\-args  \-maccumulate\-outgoing\-args  \-m128bit\-long\-double 
-\&\-m96bit\-long\-double \-mlong\-double\-64 \-mlong\-double\-80 
+\&\-m96bit\-long\-double \-mlong\-double\-64 \-mlong\-double\-80 \-mlong\-double\-128 
 \&\-mregparm=\fR\fInum\fR  \fB\-msseregparm 
 \&\-mveclibabi=\fR\fItype\fR \fB\-mvect8\-ret\-in\-mem 
 \&\-mpc32 \-mpc64 \-mpc80 \-mstackrealign 
@@ -878,7 +877,12 @@ See \s-1RS/6000\s0 and PowerPC Options.
 \&\-mno\-recip\-precision 
 \&\-mveclibabi=\fR\fItype\fR \fB\-mfriz \-mno\-friz 
 \&\-mpointers\-to\-nested\-functions \-mno\-pointers\-to\-nested\-functions 
-\&\-msave\-toc\-indirect \-mno\-save\-toc\-indirect\fR
+\&\-msave\-toc\-indirect \-mno\-save\-toc\-indirect 
+\&\-mpower8\-fusion \-mno\-mpower8\-fusion \-mpower8\-vector \-mno\-power8\-vector 
+\&\-mcrypto \-mno\-crypto \-mdirect\-move \-mno\-direct\-move 
+\&\-mquad\-memory \-mno\-quad\-memory 
+\&\-mquad\-memory\-atomic \-mno\-quad\-memory\-atomic 
+\&\-mcompat\-align\-parm \-mno\-compat\-align\-parm\fR
 .Sp
 \&\fI\s-1RX\s0 Options\fR
 \&\fB\-m64bit\-doubles  \-m32bit\-doubles  \-fpu  \-nofpu
@@ -948,6 +952,7 @@ See \s-1RS/6000\s0 and PowerPC Options.
 \&\-mhard\-quad\-float  \-msoft\-quad\-float 
 \&\-mstack\-bias  \-mno\-stack\-bias 
 \&\-munaligned\-doubles  \-mno\-unaligned\-doubles 
+\&\-muser\-mode  \-mno\-user\-mode 
 \&\-mv8plus  \-mno\-v8plus  \-mvis  \-mno\-vis 
 \&\-mvis2  \-mno\-vis2  \-mvis3  \-mno\-vis3 
 \&\-mcbcond \-mno\-cbcond 
@@ -1025,6 +1030,7 @@ See S/390 and zSeries Options.
 \&\fB\-ffixed\-\fR\fIreg\fR  \fB\-fexceptions 
 \&\-fnon\-call\-exceptions  \-fdelete\-dead\-exceptions  \-funwind\-tables 
 \&\-fasynchronous\-unwind\-tables 
+\&\-fno\-gnu\-unique 
 \&\-finhibit\-size\-directive  \-finstrument\-functions 
 \&\-finstrument\-functions\-exclude\-function\-list=\fR\fIsym\fR\fB,\fR\fIsym\fR\fB,... 
 \&\-finstrument\-functions\-exclude\-file\-list=\fR\fIfile\fR\fB,\fR\fIfile\fR\fB,... 
@@ -6014,7 +6020,7 @@ optimizations designed to reduce code size.
 \&\fB\-Os\fR disables the following optimization flags:
 \&\fB\-falign\-functions  \-falign\-jumps  \-falign\-loops 
 \&\-falign\-labels  \-freorder\-blocks  \-freorder\-blocks\-and\-partition 
-\&\-fprefetch\-loop\-arrays\fR
+\&\-fprefetch\-loop\-arrays  \-ftree\-vect\-loop\-version\fR
 .IP "\fB\-Ofast\fR" 4
 .IX Item "-Ofast"
 Disregard strict standards compliance.  \fB\-Ofast\fR enables all
@@ -7157,20 +7163,18 @@ Perform loop vectorization on trees. This flag is enabled by default at
 .IX Item "-ftree-slp-vectorize"
 Perform basic block vectorization on trees. This flag is enabled by default at
 \&\fB\-O3\fR and when \fB\-ftree\-vectorize\fR is enabled.
-.IP "\fB\-fvect\-cost\-model=\fR\fImodel\fR" 4
-.IX Item "-fvect-cost-model=model"
-Alter the cost model used for vectorization.  The \fImodel\fR argument
-should be one of \f(CW\*(C`unlimited\*(C'\fR, \f(CW\*(C`dynamic\*(C'\fR or \f(CW\*(C`cheap\*(C'\fR.
-With the \f(CW\*(C`unlimited\*(C'\fR model the vectorized code-path is assumed
-to be profitable while with the \f(CW\*(C`dynamic\*(C'\fR model a runtime check
-will guard the vectorized code-path to enable it only for iteration
-counts that will likely execute faster than when executing the original
-scalar loop.  The \f(CW\*(C`cheap\*(C'\fR model will disable vectorization of
-loops where doing so would be cost prohibitive for example due to
-required runtime checks for data dependence or alignment but otherwise
-is equal to the \f(CW\*(C`dynamic\*(C'\fR model.
-The default cost model depends on other optimization flags and is
-either \f(CW\*(C`dynamic\*(C'\fR or \f(CW\*(C`cheap\*(C'\fR.
+.IP "\fB\-ftree\-vect\-loop\-version\fR" 4
+.IX Item "-ftree-vect-loop-version"
+Perform loop versioning when doing loop vectorization on trees.  When a loop
+appears to be vectorizable except that data alignment or data dependence cannot
+be determined at compile time, then vectorized and non-vectorized versions of
+the loop are generated along with run-time checks for alignment or dependence
+to control which version is executed.  This option is enabled by default
+except at level \fB\-Os\fR where it is disabled.
+.IP "\fB\-fvect\-cost\-model\fR" 4
+.IX Item "-fvect-cost-model"
+Enable cost model for vectorization.  This option is enabled by default at
+\&\fB\-O3\fR.
 .IP "\fB\-ftree\-vrp\fR" 4
 .IX Item "-ftree-vrp"
 Perform Value Range Propagation on trees.  This is similar to the
@@ -7751,6 +7755,9 @@ Use the \fBbfd\fR linker instead of the default linker.
 .IP "\fB\-fuse\-ld=gold\fR" 4
 .IX Item "-fuse-ld=gold"
 Use the \fBgold\fR linker instead of the default linker.
+.IP "\fB\-fuse\-ld=mcld\fR" 4
+.IX Item "-fuse-ld=mcld"
+Use the \fBmcld\fR linker instead of the default linker.
 .IP "\fB\-fcprop\-registers\fR" 4
 .IX Item "-fcprop-registers"
 After register allocation and post-register allocation instruction splitting,
@@ -8522,15 +8529,13 @@ constraints.  The default value is 0.
 .IP "\fBvect-max-version-for-alignment-checks\fR" 4
 .IX Item "vect-max-version-for-alignment-checks"
 The maximum number of run-time checks that can be performed when
-doing loop versioning for alignment in the vectorizer.
+doing loop versioning for alignment in the vectorizer.  See option
+\&\fB\-ftree\-vect\-loop\-version\fR for more information.
 .IP "\fBvect-max-version-for-alias-checks\fR" 4
 .IX Item "vect-max-version-for-alias-checks"
 The maximum number of run-time checks that can be performed when
-doing loop versioning for alias in the vectorizer.
-.IP "\fBvect-max-peeling-for-alignment\fR" 4
-.IX Item "vect-max-peeling-for-alignment"
-The maximum number of loop peels to enhance access alignment
-for vectorizer. Value \-1 means 'no limit'.
+doing loop versioning for alias in the vectorizer.  See option
+\&\fB\-ftree\-vect\-loop\-version\fR for more information.
 .IP "\fBmax-iterations-to-track\fR" 4
 .IX Item "max-iterations-to-track"
 The maximum number of iterations of a loop the brute-force algorithm
@@ -10247,6 +10252,15 @@ of \s-1TLS\s0 variables.  This is the default.
 .IX Item "-mtls-dialect=traditional"
 Use traditional \s-1TLS\s0 as the thread-local storage mechanism for dynamic accesses
 of \s-1TLS\s0 variables.
+.IP "\fB\-mfix\-cortex\-a53\-835769\fR" 4
+.IX Item "-mfix-cortex-a53-835769"
+.PD 0
+.IP "\fB\-mno\-fix\-cortex\-a53\-835769\fR" 4
+.IX Item "-mno-fix-cortex-a53-835769"
+.PD
+Enable or disable the workaround for the \s-1ARM\s0 Cortex\-A53 erratum number 835769.
+This will involve inserting a \s-1NOP\s0 instruction between memory instructions and
+64\-bit integer multiply-accumulate instructions.
 .IP "\fB\-march=\fR\fIname\fR" 4
 .IX Item "-march=name"
 Specify the name of the target architecture, optionally suffixed by one or
@@ -10288,9 +10302,6 @@ modifiers.
 .PP
 Feature modifiers used with \fB\-march\fR and \fB\-mcpu\fR can be one
 the following:
-.IP "\fBcrc\fR" 4
-.IX Item "crc"
-Enable \s-1CRC\s0 extension.
 .IP "\fBcrypto\fR" 4
 .IX Item "crypto"
 Enable Crypto extension.  This implies Advanced \s-1SIMD\s0 is enabled.
@@ -10522,16 +10533,13 @@ of the \fB\-mcpu=\fR option.  Permissible names are: \fBarmv2\fR,
 \&\fBarmv6\fR, \fBarmv6j\fR,
 \&\fBarmv6t2\fR, \fBarmv6z\fR, \fBarmv6zk\fR, \fBarmv6\-m\fR,
 \&\fBarmv7\fR, \fBarmv7\-a\fR, \fBarmv7\-r\fR, \fBarmv7\-m\fR, \fBarmv7e\-m\fR
-\&\fBarmv8\-a\fR, \fBarmv8\-a+crc\fR,
+\&\fBarmv8\-a\fR,
 \&\fBiwmmxt\fR, \fBiwmmxt2\fR, \fBep9312\fR.
-.Sp
-\&\fB\-march=armv8\-a+crc\fR enables code generation for the ARMv8\-A
-architecture together with the optional \s-1CRC32\s0 extensions.
 .Sp
 \&\fB\-march=native\fR causes the compiler to auto-detect the architecture
 of the build computer.  At present, this feature is only supported on
-Linux, and not all architectures are recognized.  If the auto-detect is
-unsuccessful the option has no effect.
+GNU/Linux, and not all architectures are recognized.  If the auto-detect
+is unsuccessful the option has no effect.
 .IP "\fB\-mtune=\fR\fIname\fR" 4
 .IX Item "-mtune=name"
 This option specifies the name of the target \s-1ARM\s0 processor for
@@ -10556,8 +10564,8 @@ Permissible names are: \fBarm2\fR, \fBarm250\fR,
 \&\fBarm1136j\-s\fR, \fBarm1136jf\-s\fR, \fBmpcore\fR, \fBmpcorenovfp\fR,
 \&\fBarm1156t2\-s\fR, \fBarm1156t2f\-s\fR, \fBarm1176jz\-s\fR, \fBarm1176jzf\-s\fR,
 \&\fBcortex\-a5\fR, \fBcortex\-a7\fR, \fBcortex\-a8\fR, \fBcortex\-a9\fR, 
-\&\fBcortex\-a15\fR, \fBcortex\-a53\fR, \fBcortex\-r4\fR, \fBcortex\-r4f\fR,
-\&\fBcortex\-r5\fR, \fBcortex\-r7\fR, \fBcortex\-m4\fR, \fBcortex\-m3\fR,
+\&\fBcortex\-a15\fR, \fBcortex\-r4\fR, \fBcortex\-r4f\fR, \fBcortex\-r5\fR,
+\&\fBcortex\-m4\fR, \fBcortex\-m3\fR,
 \&\fBcortex\-m1\fR,
 \&\fBcortex\-m0\fR,
 \&\fBcortex\-m0plus\fR,
@@ -10575,7 +10583,7 @@ this option may change in future \s-1GCC\s0 versions as \s-1CPU\s0 models come a
 .Sp
 \&\fB\-mtune=native\fR causes the compiler to auto-detect the \s-1CPU\s0
 of the build computer.  At present, this feature is only supported on
-Linux, and not all architectures are recognized.  If the auto-detect is
+GNU/Linux, and not all architectures are recognized.  If the auto-detect is
 unsuccessful the option has no effect.
 .IP "\fB\-mcpu=\fR\fIname\fR" 4
 .IX Item "-mcpu=name"
@@ -10595,8 +10603,8 @@ See \fB\-mtune\fR for more information.
 .Sp
 \&\fB\-mcpu=native\fR causes the compiler to auto-detect the \s-1CPU\s0
 of the build computer.  At present, this feature is only supported on
-Linux, and not all architectures are recognized.  If the auto-detect is
-unsuccessful the option has no effect.
+GNU/Linux, and not all architectures are recognized.  If the auto-detect
+is unsuccessful the option has no effect.
 .IP "\fB\-mfpu=\fR\fIname\fR" 4
 .IX Item "-mfpu=name"
 This specifies what floating-point hardware (or hardware emulation) is
@@ -10789,16 +10797,6 @@ generated object file to either true or false, depending upon the
 setting of this option.  If unaligned access is enabled then the
 preprocessor symbol \f(CW\*(C`_\|_ARM_FEATURE_UNALIGNED\*(C'\fR will also be
 defined.
-.IP "\fB\-mneon\-for\-64bits\fR" 4
-.IX Item "-mneon-for-64bits"
-Enables using Neon to handle scalar 64\-bits operations. This is
-disabled by default since the cost of moving data from core registers
-to Neon is high.
-.IP "\fB\-mrestrict\-it\fR" 4
-.IX Item "-mrestrict-it"
-Restricts generation of \s-1IT\s0 blocks to conform to the rules of ARMv8.
-\&\s-1IT\s0 blocks can only contain a single 16\-bit instruction from a select
-set of instructions. This option is on by default for ARMv8 Thumb mode.
 .PP
 \fI\s-1AVR\s0 Options\fR
 .IX Subsection "AVR Options"
@@ -11772,7 +11770,7 @@ are compatible with as many systems and code bases as possible.
 .IP "\fB\-mkernel\fR" 4
 .IX Item "-mkernel"
 Enable kernel development mode.  The \fB\-mkernel\fR option sets
-\&\fB\-static\fR, \fB\-fno\-common\fR, \fB\-fno\-cxa\-atexit\fR,
+\&\fB\-static\fR, \fB\-fno\-common\fR, \fB\-fno\-use\-cxa\-atexit\fR,
 \&\fB\-fno\-exceptions\fR, \fB\-fno\-non\-call\-exceptions\fR,
 \&\fB\-fapple\-kext\fR, \fB\-fno\-weak\fR and \fB\-fno\-rtti\fR where
 applicable.  This mode also sets \fB\-mno\-altivec\fR,
@@ -13216,10 +13214,14 @@ with code compiled without that switch.
 .PD 0
 .IP "\fB\-mlong\-double\-80\fR" 4
 .IX Item "-mlong-double-80"
+.IP "\fB\-mlong\-double\-128\fR" 4
+.IX Item "-mlong-double-128"
 .PD
 These switches control the size of \f(CW\*(C`long double\*(C'\fR type. A size
 of 64 bits makes the \f(CW\*(C`long double\*(C'\fR type equivalent to the \f(CW\*(C`double\*(C'\fR
-type. This is the default for Bionic C library.
+type. This is the default for 32\-bit Bionic C library.  A size
+of 128 bits makes the \f(CW\*(C`long double\*(C'\fR type equivalent to the
+\&\f(CW\*(C`_\|_float128\*(C'\fR type. This is the default for 64\-bit Bionic C library.
 .Sp
 \&\fBWarning:\fR if you override the default value for your target \s-1ABI,\s0 this
 changes the size of
@@ -16330,7 +16332,9 @@ following options:
 \&\fB\-maltivec  \-mfprnd  \-mhard\-float  \-mmfcrf  \-mmultiple 
 \&\-mpopcntb \-mpopcntd  \-mpowerpc64 
 \&\-mpowerpc\-gpopt  \-mpowerpc\-gfxopt  \-msingle\-float \-mdouble\-float 
-\&\-msimple\-fpu \-mstring  \-mmulhw  \-mdlmzb  \-mmfpgpr \-mvsx\fR
+\&\-msimple\-fpu \-mstring  \-mmulhw  \-mdlmzb  \-mmfpgpr \-mvsx 
+\&\-mcrypto \-mdirect\-move \-mpower8\-fusion \-mpower8\-vector 
+\&\-mquad\-memory \-mquad\-memory\-atomic\fR
 .Sp
 The particular options set for any particular \s-1CPU\s0 varies between
 compiler versions, depending on what setting seems to produce optimal
@@ -16377,6 +16381,36 @@ enable the use of built-in functions that allow more direct access to
 the AltiVec instruction set.  You may also need to set
 \&\fB\-mabi=altivec\fR to adjust the current \s-1ABI\s0 with AltiVec \s-1ABI\s0
 enhancements.
+.Sp
+When \fB\-maltivec\fR is used, rather than \fB\-maltivec=le\fR or
+\&\fB\-maltivec=be\fR, the element order for Altivec intrinsics such
+as \f(CW\*(C`vec_splat\*(C'\fR, \f(CW\*(C`vec_extract\*(C'\fR, and \f(CW\*(C`vec_insert\*(C'\fR will
+match array element order corresponding to the endianness of the
+target.  That is, element zero identifies the leftmost element in a
+vector register when targeting a big-endian platform, and identifies
+the rightmost element in a vector register when targeting a
+little-endian platform.
+.IP "\fB\-maltivec=be\fR" 4
+.IX Item "-maltivec=be"
+Generate Altivec instructions using big-endian element order,
+regardless of whether the target is big\- or little-endian.  This is
+the default when targeting a big-endian platform.
+.Sp
+The element order is used to interpret element numbers in Altivec
+intrinsics such as \f(CW\*(C`vec_splat\*(C'\fR, \f(CW\*(C`vec_extract\*(C'\fR, and
+\&\f(CW\*(C`vec_insert\*(C'\fR.  By default, these will match array element order
+corresponding to the endianness for the target.
+.IP "\fB\-maltivec=le\fR" 4
+.IX Item "-maltivec=le"
+Generate Altivec instructions using little-endian element order,
+regardless of whether the target is big\- or little-endian.  This is
+the default when targeting a little-endian platform.  This option is
+currently ignored when targeting a big-endian platform.
+.Sp
+The element order is used to interpret element numbers in Altivec
+intrinsics such as \f(CW\*(C`vec_splat\*(C'\fR, \f(CW\*(C`vec_extract\*(C'\fR, and
+\&\f(CW\*(C`vec_insert\*(C'\fR.  By default, these will match array element order
+corresponding to the endianness for the target.
 .IP "\fB\-mvrsave\fR" 4
 .IX Item "-mvrsave"
 .PD 0
@@ -16445,6 +16479,61 @@ This option has been deprecated.  Use \fB\-mspe\fR and
 Generate code that uses (does not use) vector/scalar (\s-1VSX\s0)
 instructions, and also enable the use of built-in functions that allow
 more direct access to the \s-1VSX\s0 instruction set.
+.IP "\fB\-mcrypto\fR" 4
+.IX Item "-mcrypto"
+.PD 0
+.IP "\fB\-mno\-crypto\fR" 4
+.IX Item "-mno-crypto"
+.PD
+Enable the use (disable) of the built-in functions that allow direct
+access to the cryptographic instructions that were added in version
+2.07 of the PowerPC \s-1ISA.\s0
+.IP "\fB\-mdirect\-move\fR" 4
+.IX Item "-mdirect-move"
+.PD 0
+.IP "\fB\-mno\-direct\-move\fR" 4
+.IX Item "-mno-direct-move"
+.PD
+Generate code that uses (does not use) the instructions to move data
+between the general purpose registers and the vector/scalar (\s-1VSX\s0)
+registers that were added in version 2.07 of the PowerPC \s-1ISA.\s0
+.IP "\fB\-mpower8\-fusion\fR" 4
+.IX Item "-mpower8-fusion"
+.PD 0
+.IP "\fB\-mno\-power8\-fusion\fR" 4
+.IX Item "-mno-power8-fusion"
+.PD
+Generate code that keeps (does not keeps) some integer operations
+adjacent so that the instructions can be fused together on power8 and
+later processors.
+.IP "\fB\-mpower8\-vector\fR" 4
+.IX Item "-mpower8-vector"
+.PD 0
+.IP "\fB\-mno\-power8\-vector\fR" 4
+.IX Item "-mno-power8-vector"
+.PD
+Generate code that uses (does not use) the vector and scalar
+instructions that were added in version 2.07 of the PowerPC \s-1ISA. \s0 Also
+enable the use of built-in functions that allow more direct access to
+the vector instructions.
+.IP "\fB\-mquad\-memory\fR" 4
+.IX Item "-mquad-memory"
+.PD 0
+.IP "\fB\-mno\-quad\-memory\fR" 4
+.IX Item "-mno-quad-memory"
+.PD
+Generate code that uses (does not use) the non-atomic quad word memory
+instructions.  The \fB\-mquad\-memory\fR option requires use of
+64\-bit mode.
+.IP "\fB\-mquad\-memory\-atomic\fR" 4
+.IX Item "-mquad-memory-atomic"
+.PD 0
+.IP "\fB\-mno\-quad\-memory\-atomic\fR" 4
+.IX Item "-mno-quad-memory-atomic"
+.PD
+Generate code that uses (does not use) the atomic quad word memory
+instructions.  The \fB\-mquad\-memory\-atomic\fR option requires use of
+64\-bit mode.
 .IP "\fB\-mfloat\-gprs=\fR\fIyes/single/double/no\fR" 4
 .IX Item "-mfloat-gprs=yes/single/double/no"
 .PD 0
@@ -16874,7 +16963,8 @@ Return structures smaller than 8 bytes in registers (as specified by the
 .IX Item "-mabi=abi-type"
 Extend the current \s-1ABI\s0 with a particular extension, or remove such extension.
 Valid values are \fIaltivec\fR, \fIno-altivec\fR, \fIspe\fR,
-\&\fIno-spe\fR, \fIibmlongdouble\fR, \fIieeelongdouble\fR.
+\&\fIno-spe\fR, \fIibmlongdouble\fR, \fIieeelongdouble\fR,
+\&\fIelfv1\fR, \fIelfv2\fR.
 .IP "\fB\-mabi=spe\fR" 4
 .IX Item "-mabi=spe"
 Extend the current \s-1ABI\s0 with \s-1SPE ABI\s0 extensions.  This does not change
@@ -16891,6 +16981,18 @@ This is a PowerPC 32\-bit \s-1SYSV ABI\s0 option.
 .IX Item "-mabi=ieeelongdouble"
 Change the current \s-1ABI\s0 to use \s-1IEEE\s0 extended-precision long double.
 This is a PowerPC 32\-bit Linux \s-1ABI\s0 option.
+.IP "\fB\-mabi=elfv1\fR" 4
+.IX Item "-mabi=elfv1"
+Change the current \s-1ABI\s0 to use the ELFv1 \s-1ABI.\s0
+This is the default \s-1ABI\s0 for big-endian PowerPC 64\-bit Linux.
+Overriding the default \s-1ABI\s0 requires special system support and is
+likely to fail in spectacular ways.
+.IP "\fB\-mabi=elfv2\fR" 4
+.IX Item "-mabi=elfv2"
+Change the current \s-1ABI\s0 to use the ELFv2 \s-1ABI.\s0
+This is the default \s-1ABI\s0 for little-endian PowerPC 64\-bit Linux.
+Overriding the default \s-1ABI\s0 requires special system support and is
+likely to fail in spectacular ways.
 .IP "\fB\-mprototype\fR" 4
 .IX Item "-mprototype"
 .PD 0
@@ -17178,6 +17280,25 @@ stack location in the function prologue if the function calls through
 a pointer on \s-1AIX\s0 and 64\-bit Linux systems.  If the \s-1TOC\s0 value is not
 saved in the prologue, it is saved just before the call through the
 pointer.  The \fB\-mno\-save\-toc\-indirect\fR option is the default.
+.IP "\fB\-mcompat\-align\-parm\fR" 4
+.IX Item "-mcompat-align-parm"
+.PD 0
+.IP "\fB\-mno\-compat\-align\-parm\fR" 4
+.IX Item "-mno-compat-align-parm"
+.PD
+Generate (do not generate) code to pass structure parameters with a
+maximum alignment of 64 bits, for compatibility with older versions
+of \s-1GCC.\s0
+.Sp
+Older versions of \s-1GCC \s0(prior to 4.9.0) incorrectly did not align a
+structure parameter on a 128\-bit boundary when that structure contained
+a member requiring 128\-bit alignment.  This is corrected in more
+recent versions of \s-1GCC. \s0 This option may be used to generate code
+that is compatible with functions compiled with older versions of
+\&\s-1GCC.\s0
+.Sp
+In this version of the compiler, the \fB\-mcompat\-align\-parm\fR
+is the default, except when using the Linux ELFv2 \s-1ABI.\s0
 .PP
 \fI\s-1RX\s0 Options\fR
 .IX Subsection "RX Options"
@@ -17659,6 +17780,58 @@ single-precision mode by default.
 .IP "\fB\-m4\fR" 4
 .IX Item "-m4"
 Generate code for the \s-1SH4.\s0
+.IP "\fB\-m4\-100\fR" 4
+.IX Item "-m4-100"
+Generate code for \s-1SH4\-100.\s0
+.IP "\fB\-m4\-100\-nofpu\fR" 4
+.IX Item "-m4-100-nofpu"
+Generate code for \s-1SH4\-100\s0 in such a way that the
+floating-point unit is not used.
+.IP "\fB\-m4\-100\-single\fR" 4
+.IX Item "-m4-100-single"
+Generate code for \s-1SH4\-100\s0 assuming the floating-point unit is in
+single-precision mode by default.
+.IP "\fB\-m4\-100\-single\-only\fR" 4
+.IX Item "-m4-100-single-only"
+Generate code for \s-1SH4\-100\s0 in such a way that no double-precision
+floating-point operations are used.
+.IP "\fB\-m4\-200\fR" 4
+.IX Item "-m4-200"
+Generate code for \s-1SH4\-200.\s0
+.IP "\fB\-m4\-200\-nofpu\fR" 4
+.IX Item "-m4-200-nofpu"
+Generate code for \s-1SH4\-200\s0 without in such a way that the
+floating-point unit is not used.
+.IP "\fB\-m4\-200\-single\fR" 4
+.IX Item "-m4-200-single"
+Generate code for \s-1SH4\-200\s0 assuming the floating-point unit is in
+single-precision mode by default.
+.IP "\fB\-m4\-200\-single\-only\fR" 4
+.IX Item "-m4-200-single-only"
+Generate code for \s-1SH4\-200\s0 in such a way that no double-precision
+floating-point operations are used.
+.IP "\fB\-m4\-300\fR" 4
+.IX Item "-m4-300"
+Generate code for \s-1SH4\-300.\s0
+.IP "\fB\-m4\-300\-nofpu\fR" 4
+.IX Item "-m4-300-nofpu"
+Generate code for \s-1SH4\-300\s0 without in such a way that the
+floating-point unit is not used.
+.IP "\fB\-m4\-300\-single\fR" 4
+.IX Item "-m4-300-single"
+Generate code for \s-1SH4\-300\s0 in such a way that no double-precision
+floating-point operations are used.
+.IP "\fB\-m4\-300\-single\-only\fR" 4
+.IX Item "-m4-300-single-only"
+Generate code for \s-1SH4\-300\s0 in such a way that no double-precision
+floating-point operations are used.
+.IP "\fB\-m4\-340\fR" 4
+.IX Item "-m4-340"
+Generate code for \s-1SH4\-340 \s0(no \s-1MMU,\s0 no \s-1FPU\s0).
+.IP "\fB\-m4\-500\fR" 4
+.IX Item "-m4-500"
+Generate code for \s-1SH4\-500 \s0(no \s-1FPU\s0).  Passes \fB\-isa=sh4\-nofpu\fR to the
+assembler.
 .IP "\fB\-m4a\-nofpu\fR" 4
 .IX Item "-m4a-nofpu"
 Generate code for the SH4al\-dsp, or for a SH4a in such a way that the
@@ -17679,6 +17852,27 @@ Generate code for the SH4a.
 Same as \fB\-m4a\-nofpu\fR, except that it implicitly passes
 \&\fB\-dsp\fR to the assembler.  \s-1GCC\s0 doesn't generate any \s-1DSP\s0
 instructions at the moment.
+.IP "\fB\-m5\-32media\fR" 4
+.IX Item "-m5-32media"
+Generate 32\-bit code for SHmedia.
+.IP "\fB\-m5\-32media\-nofpu\fR" 4
+.IX Item "-m5-32media-nofpu"
+Generate 32\-bit code for SHmedia in such a way that the
+floating-point unit is not used.
+.IP "\fB\-m5\-64media\fR" 4
+.IX Item "-m5-64media"
+Generate 64\-bit code for SHmedia.
+.IP "\fB\-m5\-64media\-nofpu\fR" 4
+.IX Item "-m5-64media-nofpu"
+Generate 64\-bit code for SHmedia in such a way that the
+floating-point unit is not used.
+.IP "\fB\-m5\-compact\fR" 4
+.IX Item "-m5-compact"
+Generate code for SHcompact.
+.IP "\fB\-m5\-compact\-nofpu\fR" 4
+.IX Item "-m5-compact-nofpu"
+Generate code for SHcompact in such a way that the
+floating-point unit is not used.
 .IP "\fB\-mb\fR" 4
 .IX Item "-mb"
 Compile code for the processor in big-endian mode.
@@ -17705,9 +17899,6 @@ Enable the use of bit manipulation instructions on \s-1SH2A.\s0
 .IX Item "-mfmovd"
 Enable the use of the instruction \f(CW\*(C`fmovd\*(C'\fR.  Check \fB\-mdalign\fR for
 alignment constraints.
-.IP "\fB\-mhitachi\fR" 4
-.IX Item "-mhitachi"
-Comply with the calling conventions defined by Renesas.
 .IP "\fB\-mrenesas\fR" 4
 .IX Item "-mrenesas"
 Comply with the calling conventions defined by Renesas.
@@ -17719,7 +17910,7 @@ targets of the \s-1SH\s0 toolchain.
 .IP "\fB\-mnomacsave\fR" 4
 .IX Item "-mnomacsave"
 Mark the \f(CW\*(C`MAC\*(C'\fR register as call-clobbered, even if
-\&\fB\-mhitachi\fR is given.
+\&\fB\-mrenesas\fR is given.
 .IP "\fB\-mieee\fR" 4
 .IX Item "-mieee"
 .PD 0
@@ -17760,14 +17951,14 @@ separated list.  For details on the atomic built-in functions see
 .IP "\fBnone\fR" 4
 .IX Item "none"
 Disable compiler generated atomic sequences and emit library calls for atomic
-operations.  This is the default if the target is not \f(CW\*(C`sh\-*\-linux*\*(C'\fR.
+operations.  This is the default if the target is not \f(CW\*(C`sh*\-*\-linux*\*(C'\fR.
 .IP "\fBsoft-gusa\fR" 4
 .IX Item "soft-gusa"
 Generate GNU/Linux compatible gUSA software atomic sequences for the atomic
 built-in functions.  The generated atomic sequences require additional support
 from the interrupt/exception handling code of the system and are only suitable
 for SH3* and SH4* single-core systems.  This option is enabled by default when
-the target is \f(CW\*(C`sh\-*\-linux*\*(C'\fR and SH3* or SH4*.  When the target is \s-1SH4A,\s0
+the target is \f(CW\*(C`sh*\-*\-linux*\*(C'\fR and SH3* or SH4*.  When the target is \s-1SH4A,\s0
 this option will also partially utilize the hardware atomic instructions
 \&\f(CW\*(C`movli.l\*(C'\fR and \f(CW\*(C`movco.l\*(C'\fR to create more efficient code, unless
 \&\fBstrict\fR is specified.
@@ -17786,7 +17977,7 @@ setting \f(CW\*(C`SR.IMASK = 1111\*(C'\fR.  This model works only when the progr
 in privileged mode and is only suitable for single-core systems.  Additional
 support from the interrupt/exception handling code of the system is not
 required.  This model is enabled by default when the target is
-\&\f(CW\*(C`sh\-*\-linux*\*(C'\fR and SH1* or SH2*.
+\&\f(CW\*(C`sh*\-*\-linux*\*(C'\fR and SH1* or SH2*.
 .IP "\fBhard-llcs\fR" 4
 .IX Item "hard-llcs"
 Generate hardware atomic sequences using the \f(CW\*(C`movli.l\*(C'\fR and \f(CW\*(C`movco.l\*(C'\fR
@@ -17820,19 +18011,21 @@ this can degrade overall performance due to the operand cache line flushes
 that are implied by the \f(CW\*(C`tas.b\*(C'\fR instruction.  On multi-core \s-1SH4A\s0
 processors the \f(CW\*(C`tas.b\*(C'\fR instruction must be used with caution since it
 can result in data corruption for certain cache configurations.
-.IP "\fB\-mspace\fR" 4
-.IX Item "-mspace"
-Optimize for space instead of speed.  Implied by \fB\-Os\fR.
 .IP "\fB\-mprefergot\fR" 4
 .IX Item "-mprefergot"
 When generating position-independent code, emit function calls using
 the Global Offset Table instead of the Procedure Linkage Table.
 .IP "\fB\-musermode\fR" 4
 .IX Item "-musermode"
-Don't generate privileged mode only code.  This option
-implies \fB\-mno\-inline\-ic_invalidate\fR
-if the inlined code would not work in user mode.
-This is the default when the target is \f(CW\*(C`sh\-*\-linux*\*(C'\fR.
+.PD 0
+.IP "\fB\-mno\-usermode\fR" 4
+.IX Item "-mno-usermode"
+.PD
+Don't allow (allow) the compiler generating privileged mode code.  Specifying
+\&\fB\-musermode\fR also implies \fB\-mno\-inline\-ic_invalidate\fR if the
+inlined code would not work in user mode.  \fB\-musermode\fR is the default
+when the target is \f(CW\*(C`sh*\-*\-linux*\*(C'\fR.  If the target is SH1* or SH2*
+\&\fB\-musermode\fR has no effect, since there is no user mode.
 .IP "\fB\-multcost=\fR\fInumber\fR" 4
 .IX Item "-multcost=number"
 Set the cost to assume for a multiply insn.
@@ -18102,8 +18295,9 @@ These \fB\-m\fR options are supported on the \s-1SPARC:\s0
 .IX Item "-mapp-regs"
 .PD
 Specify \fB\-mapp\-regs\fR to generate output using the global registers
-2 through 4, which the \s-1SPARC SVR4 ABI\s0 reserves for applications.  This
-is the default.
+2 through 4, which the \s-1SPARC SVR4 ABI\s0 reserves for applications.  Like the
+global register 1, each global register 2 through 4 is then treated as an
+allocable register that is clobbered by function calls.  This is the default.
 .Sp
 To be fully \s-1SVR4\s0 ABI-compliant at the cost of some performance loss,
 specify \fB\-mno\-app\-regs\fR.  You should compile libraries and system
@@ -18179,6 +18373,15 @@ absolute address.  Otherwise, it assumes they have 4\-byte alignment.
 Specifying this option avoids some rare compatibility problems with code
 generated by other compilers.  It is not the default because it results
 in a performance loss, especially for floating-point code.
+.IP "\fB\-muser\-mode\fR" 4
+.IX Item "-muser-mode"
+.PD 0
+.IP "\fB\-mno\-user\-mode\fR" 4
+.IX Item "-mno-user-mode"
+.PD
+Do not generate code that can only run in supervisor mode.  This is relevant
+only for the \f(CW\*(C`casa\*(C'\fR instruction emitted for the \s-1LEON3\s0 processor.  The
+default is \fB\-mno\-user\-mode\fR.
 .IP "\fB\-mno\-faster\-structs\fR" 4
 .IX Item "-mno-faster-structs"
 .PD 0
@@ -18198,8 +18401,8 @@ the rules of the \s-1ABI.\s0
 Set the instruction set, register set, and instruction scheduling parameters
 for machine type \fIcpu_type\fR.  Supported values for \fIcpu_type\fR are
 \&\fBv7\fR, \fBcypress\fR, \fBv8\fR, \fBsupersparc\fR, \fBhypersparc\fR,
-\&\fBleon\fR, \fBleon3\fR, \fBsparclite\fR, \fBf930\fR, \fBf934\fR,
-\&\fBsparclite86x\fR, \fBsparclet\fR, \fBtsc701\fR, \fBv9\fR,
+\&\fBleon\fR, \fBleon3\fR, \fBleon3v7\fR, \fBsparclite\fR, \fBf930\fR,
+\&\fBf934\fR, \fBsparclite86x\fR, \fBsparclet\fR, \fBtsc701\fR, \fBv9\fR,
 \&\fBultrasparc\fR, \fBultrasparc3\fR, \fBniagara\fR, \fBniagara2\fR,
 \&\fBniagara3\fR and \fBniagara4\fR.
 .Sp
@@ -18217,7 +18420,7 @@ implementations.
 .RS 4
 .IP "v7" 4
 .IX Item "v7"
-cypress
+cypress, leon3v7
 .IP "v8" 4
 .IX Item "v8"
 supersparc, hypersparc, leon, leon3
@@ -18283,11 +18486,11 @@ option \fB\-mcpu=\fR\fIcpu_type\fR does.
 The same values for \fB\-mcpu=\fR\fIcpu_type\fR can be used for
 \&\fB\-mtune=\fR\fIcpu_type\fR, but the only useful values are those
 that select a particular \s-1CPU\s0 implementation.  Those are \fBcypress\fR,
-\&\fBsupersparc\fR, \fBhypersparc\fR, \fBleon\fR, \fBleon3\fR, \fBf930\fR,
-\&\fBf934\fR, \fBsparclite86x\fR, \fBtsc701\fR, \fBultrasparc\fR,
-\&\fBultrasparc3\fR, \fBniagara\fR, \fBniagara2\fR, \fBniagara3\fR and
-\&\fBniagara4\fR.  With native Solaris and GNU/Linux toolchains, \fBnative\fR
-can also be used.
+\&\fBsupersparc\fR, \fBhypersparc\fR, \fBleon\fR, \fBleon3\fR,
+\&\fBleon3v7\fR, \fBf930\fR, \fBf934\fR, \fBsparclite86x\fR, \fBtsc701\fR,
+\&\fBultrasparc\fR, \fBultrasparc3\fR, \fBniagara\fR, \fBniagara2\fR,
+\&\fBniagara3\fR and \fBniagara4\fR.  With native Solaris and GNU/Linux
+toolchains, \fBnative\fR can also be used.
 .IP "\fB\-mv8plus\fR" 4
 .IX Item "-mv8plus"
 .PD 0
@@ -19187,6 +19390,19 @@ that needs this handling enables it on your behalf.
 Generate unwind table in \s-1DWARF 2\s0 format, if supported by target machine.  The
 table is exact at each instruction boundary, so it can be used for stack
 unwinding from asynchronous events (such as debugger or garbage collector).
+.IP "\fB\-fno\-gnu\-unique\fR" 4
+.IX Item "-fno-gnu-unique"
+On systems with recent \s-1GNU\s0 assembler and C library, the \*(C+ compiler
+uses the \f(CW\*(C`STB_GNU_UNIQUE\*(C'\fR binding to make sure that definitions
+of template static data members and static local variables in inline
+functions are unique even in the presence of \f(CW\*(C`RTLD_LOCAL\*(C'\fR; this
+is necessary to avoid problems with a library used by two different
+\&\f(CW\*(C`RTLD_LOCAL\*(C'\fR plugins depending on a definition in one of them and
+therefore disagreeing with the other one about the binding of the
+symbol.  But this causes \f(CW\*(C`dlclose\*(C'\fR to be ignored for affected
+DSOs; if your program relies on reinitialization of a \s-1DSO\s0 via
+\&\f(CW\*(C`dlclose\*(C'\fR and \f(CW\*(C`dlopen\*(C'\fR, you can use
+\&\fB\-fno\-gnu\-unique\fR.
 .IP "\fB\-fpcc\-struct\-return\fR" 4
 .IX Item "-fpcc-struct-return"
 Return \*(L"short\*(R" \f(CW\*(C`struct\*(C'\fR and \f(CW\*(C`union\*(C'\fR values in memory like
