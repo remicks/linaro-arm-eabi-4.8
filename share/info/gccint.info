@@ -55,9 +55,8 @@ Introduction
 This manual documents the internals of the GNU compilers, including how
 to port them to new targets and some information about how to write
 front ends for new languages.  It corresponds to the compilers
-(UBER-Linaro-4.8.3_arm+graphite) version 4.8.3.  The use of the GNU
-compilers is documented in a separate manual.  *Note Introduction:
-(gcc)Top.
+(UBER-Linaro-4.8.5) version 4.8.5.  The use of the GNU compilers is
+documented in a separate manual.  *Note Introduction: (gcc)Top.
 
  This manual is mainly a reference manual rather than a tutorial.  It
 discusses how to contribute to GCC (*note Contributing::), the
@@ -4544,6 +4543,9 @@ specified for the particular test in an earlier 'dg-options' or
 'double64plus'
      Target has 'double' that is 64 bits or longer.
 
+'longdouble128'
+     Target has 128-bit 'long double'.
+
 'int32plus'
      Target has 'int' that is at 32 bits or longer.
 
@@ -4832,6 +4834,12 @@ specified for the particular test in an earlier 'dg-options' or
 7.2.3.8 PowerPC-specific attributes
 ...................................
 
+'dfp_hw'
+     PowerPC target supports executing hardware DFP instructions.
+
+'p8vector_hw'
+     PowerPC target supports executing VSX instructions (ISA 2.07).
+
 'powerpc64'
      Test system supports executing 64-bit instructions.
 
@@ -4841,11 +4849,23 @@ specified for the particular test in an earlier 'dg-options' or
 'powerpc_altivec_ok'
      PowerPC target supports '-maltivec'.
 
+'powerpc_eabi_ok'
+     PowerPC target supports '-meabi'.
+
+'powerpc_elfv2'
+     PowerPC target supports '-mabi=elfv2'.
+
 'powerpc_fprs'
      PowerPC target supports floating-point registers.
 
 'powerpc_hard_double'
      PowerPC target supports hardware double-precision floating-point.
+
+'powerpc_htm_ok'
+     PowerPC target supports '-mhtm'
+
+'powerpc_p8vector_ok'
+     PowerPC target supports '-mpower8-vector'
 
 'powerpc_ppu_ok'
      PowerPC target supports '-mcpu=cell'.
@@ -4860,10 +4880,6 @@ specified for the particular test in an earlier 'dg-options' or
 'powerpc_spu'
      PowerPC target supports PowerPC SPU.
 
-'spu_auto_overlay'
-     SPU target has toolchain that supports automatic overlay
-     generation.
-
 'powerpc_vsx_ok'
      PowerPC target supports '-mvsx'.
 
@@ -4871,8 +4887,18 @@ specified for the particular test in an earlier 'dg-options' or
      Including the options used to compile this particular test, the
      PowerPC target supports PowerPC 405.
 
+'ppc_recip_hw'
+     PowerPC target supports executing reciprocal estimate instructions.
+
+'spu_auto_overlay'
+     SPU target has toolchain that supports automatic overlay
+     generation.
+
 'vmx_hw'
      PowerPC target supports executing AltiVec instructions.
+
+'vsx_hw'
+     PowerPC target supports executing VSX instructions (ISA 2.06).
 
 7.2.3.9 Other hardware attributes
 .................................
@@ -19366,6 +19392,9 @@ _AArch64 family--'config/aarch64/constraints.md'_
      'Z'
           Integer constant zero
 
+     'Usa'
+          An absolute symbolic address
+
      'Ush'
           The high part (bits 12 and upwards) of the pc-relative address
           of a symbol within 4GB of the instruction
@@ -19700,7 +19729,7 @@ _picoChip family--'picochip.h'_
      'O'
           16-bit signed integer.
 
-_PowerPC and IBM RS6000--'config/rs6000/rs6000.h'_
+_PowerPC and IBM RS6000--'config/rs6000/constraints.md'_
      'b'
           Address base register
 
@@ -19713,17 +19742,80 @@ _PowerPC and IBM RS6000--'config/rs6000/rs6000.h'_
      'v'
           Altivec vector register
 
+     'wa'
+          Any VSX register if the -mvsx option was used or NO_REGS.
+
      'wd'
-          VSX vector register to hold vector double data
+          VSX vector register to hold vector double data or NO_REGS.
 
      'wf'
-          VSX vector register to hold vector float data
+          VSX vector register to hold vector float data or NO_REGS.
+
+     'wg'
+          If '-mmfpgpr' was used, a floating point register or NO_REGS.
+
+     'wh'
+          Floating point register if direct moves are available, or
+          NO_REGS.
+
+     'wi'
+          FP or VSX register to hold 64-bit integers for VSX insns or
+          NO_REGS.
+
+     'wj'
+          FP or VSX register to hold 64-bit integers for direct moves or
+          NO_REGS.
+
+     'wk'
+          FP or VSX register to hold 64-bit doubles for direct moves or
+          NO_REGS.
+
+     'wl'
+          Floating point register if the LFIWAX instruction is enabled
+          or NO_REGS.
+
+     'wm'
+          VSX register if direct move instructions are enabled, or
+          NO_REGS.
+
+     'wn'
+          No register (NO_REGS).
+
+     'wr'
+          General purpose register if 64-bit instructions are enabled or
+          NO_REGS.
 
      'ws'
-          VSX vector register to hold scalar float data
+          VSX vector register to hold scalar double values or NO_REGS.
 
-     'wa'
-          Any VSX register
+     'wt'
+          VSX vector register to hold 128 bit integer or NO_REGS.
+
+     'wu'
+          Altivec register to use for float/32-bit int loads/stores or
+          NO_REGS.
+
+     'wv'
+          Altivec register to use for double loads/stores or NO_REGS.
+
+     'ww'
+          FP or VSX register to perform float operations under '-mvsx'
+          or NO_REGS.
+
+     'wx'
+          Floating point register if the STFIWX instruction is enabled
+          or NO_REGS.
+
+     'wy'
+          FP or VSX register to perform ISA 2.07 float ops or NO_REGS.
+
+     'wz'
+          Floating point register if the LFIWZX instruction is enabled
+          or NO_REGS.
+
+     'wQ'
+          A memory address that will work with the 'lq' and 'stq'
+          instructions.
 
      'h'
           'MQ', 'CTR', or 'LINK' register
@@ -25123,10 +25215,10 @@ arithmetic terms are allowed in test expressions:
      must be a 'label_ref'.
 
 '(pc)'
-     This refers to the address of the _current_ insn.  It might have
-     been more consistent with other usage to make this the address of
-     the _next_ insn but this would be confusing because the length of
-     the current insn is to be computed.
+     For non-branch instructions and backward branch instructions, this
+     refers to the address of the current insn.  But for forward branch
+     instructions, this refers to the address of the next insn, because
+     the length of the current insn is to be computed.
 
  For normal insns, the length will be determined by value of the
 'length' attribute.  In the case of 'addr_vec' and 'addr_diff_vec' insn
@@ -25703,8 +25795,7 @@ alternative is the 'define_cond_exec' template.
      (define_cond_exec
        [PREDICATE-PATTERN]
        "CONDITION"
-       "OUTPUT-TEMPLATE"
-       "OPTIONAL-INSN-ATTRIBUES")
+       "OUTPUT-TEMPLATE")
 
  PREDICATE-PATTERN is the condition that must be true for the insn to be
 executed at runtime and should match a relational operator.  One can use
@@ -25721,13 +25812,6 @@ predicate is a simple prefix to the main insn.  In order to handle the
 general case, there is a global variable 'current_insn_predicate' that
 will contain the entire predicate if the current insn is predicated, and
 will otherwise be 'NULL'.
-
- OPTIONAL-INSN-ATTRIBUTES is an optional vector of attributes that gets
-appended to the insn attributes of the produced cond_exec rtx.  It can
-be used to add some distinguishing attribute to cond_exec rtxs produced
-that way.  An example usage would be to use this attribute in
-conjunction with attributes on the main pattern to disable particular
-alternatives under certain conditions.
 
  When 'define_cond_exec' is used, an implicit reference to the
 'predicable' instruction attribute is made.  *Note Insn Attributes::.
@@ -26397,7 +26481,7 @@ modes.  Attributes are defined using:
      		      QABSNEG))]
        "TARGET_NEON"
        "vq<absneg>.<V_s_elem>\t%<V_reg>0, %<V_reg>1"
-       [(set_attr "type" "neon_vqneg_vqabs")]
+       [(set_attr "neon_type" "neon_vqneg_vqabs")]
      )
 
 
@@ -26410,7 +26494,7 @@ modes.  Attributes are defined using:
      		      UNSPEC_VQABS))]
        "TARGET_NEON"
        "vqabs.<V_s_elem>\t%<V_reg>0, %<V_reg>1"
-       [(set_attr "type" "neon_vqneg_vqabs")]
+       [(set_attr "neon_type" "neon_vqneg_vqabs")]
      )
 
      (define_insn "neon_vqneg<mode>"
@@ -26420,7 +26504,7 @@ modes.  Attributes are defined using:
      		      UNSPEC_VQNEG))]
        "TARGET_NEON"
        "vqneg.<V_s_elem>\t%<V_reg>0, %<V_reg>1"
-       [(set_attr "type" "neon_vqneg_vqabs")]
+       [(set_attr "neon_type" "neon_vqneg_vqabs")]
      )
 
 
@@ -30117,6 +30201,12 @@ certain arguments in registers.
      machine-dependent stack frame: 'OUTGOING_REG_PARM_STACK_SPACE' says
      which.
 
+ -- Macro: INCOMING_REG_PARM_STACK_SPACE (FNDECL)
+     Like 'REG_PARM_STACK_SPACE', but for incoming register arguments.
+     Define this macro if space guaranteed when compiling a function
+     body is different to space required when making a call, a situation
+     that can arise with K&R style function definitions.
+
  -- Macro: OUTGOING_REG_PARM_STACK_SPACE (FNTYPE)
      Define this to a nonzero value if it is the responsibility of the
      caller to allocate the area reserved for arguments passed in
@@ -30580,11 +30670,6 @@ the stack.
      define this hook to return a nonzero value when it is required, the
      compiler will run out of spill registers and print a fatal error
      message.
-
- -- Target Hook: unsigned int TARGET_FLAGS_REGNUM
-     If the target has a dedicated flags register, and it needs to use
-     the post-reload comparison elimination pass, then this value should
-     be set appropriately.
 
 
 File: gccint.info,  Node: Scalar Return,  Next: Aggregate Return,  Prev: Register Arguments,  Up: Stack and Calling
@@ -32019,7 +32104,6 @@ interested in most macros in this section.
 
 * CC0 Condition Codes::      Old style representation of condition codes.
 * MODE_CC Condition Codes::  Modern representation of condition codes.
-* Cond Exec Macros::         Macros to control conditional execution.
 
 
 File: gccint.info,  Node: CC0 Condition Codes,  Next: MODE_CC Condition Codes,  Up: Condition Code
@@ -32087,7 +32171,7 @@ machine-specific information by defining 'CC_STATUS_MDEP'.
      patterns in two places, the 'md' file and in 'NOTICE_UPDATE_CC'.
 
 
-File: gccint.info,  Node: MODE_CC Condition Codes,  Next: Cond Exec Macros,  Prev: CC0 Condition Codes,  Up: Condition Code
+File: gccint.info,  Node: MODE_CC Condition Codes,  Prev: CC0 Condition Codes,  Up: Condition Code
 
 17.16.2 Representation of condition codes using registers
 ---------------------------------------------------------
@@ -32127,10 +32211,11 @@ File: gccint.info,  Node: MODE_CC Condition Codes,  Next: Cond Exec Macros,  Pre
      comparisons whose argument is a 'plus':
 
           #define SELECT_CC_MODE(OP,X,Y) \
-            (GET_MODE_CLASS (GET_MODE (X)) == MODE_FLOAT          \
-             ? ((OP == EQ || OP == NE) ? CCFPmode : CCFPEmode)    \
-             : ((GET_CODE (X) == PLUS || GET_CODE (X) == MINUS    \
-                 || GET_CODE (X) == NEG) \
+            (GET_MODE_CLASS (GET_MODE (X)) == MODE_FLOAT           \
+             ? ((OP == LT || OP == LE || OP == GT || OP == GE)     \
+                ? CCFPEmode : CCFPmode)                            \
+             : ((GET_CODE (X) == PLUS || GET_CODE (X) == MINUS     \
+                 || GET_CODE (X) == NEG || GET_CODE (x) == ASHIFT) \
                 ? CC_NOOVmode : CCmode))
 
      Another reason to use modes is to retain information on which
@@ -32172,10 +32257,11 @@ File: gccint.info,  Node: MODE_CC Condition Codes,  Next: Cond Exec Macros,  Pre
      You need not define this macro if it would always returns zero or
      if the floating-point format is anything other than
      'IEEE_FLOAT_FORMAT'.  For example, here is the definition used on
-     the SPARC, where floating-point inequality comparisons are always
-     given 'CCFPEmode':
+     the SPARC, where floating-point inequality comparisons are given
+     either 'CCFPEmode' or 'CCFPmode':
 
-          #define REVERSIBLE_CC_MODE(MODE)  ((MODE) != CCFPEmode)
+          #define REVERSIBLE_CC_MODE(MODE) \
+             ((MODE) != CCFPEmode && (MODE) != CCFPmode)
 
  -- Macro: REVERSE_CONDITION (CODE, MODE)
      A C expression whose value is reversed condition code of the CODE
@@ -32184,7 +32270,7 @@ File: gccint.info,  Node: MODE_CC Condition Codes,  Next: Cond Exec Macros,  Pre
      case machine has some non-standard way how to reverse certain
      conditionals.  For instance in case all floating point conditions
      are non-trapping, compiler may freely convert unordered compares to
-     ordered one.  Then definition may look like:
+     ordered ones.  Then definition may look like:
 
           #define REVERSE_CONDITION(CODE, MODE) \
              ((MODE) != CCFPmode ? reverse_condition (CODE) \
@@ -32218,15 +32304,10 @@ File: gccint.info,  Node: MODE_CC Condition Codes,  Next: Cond Exec Macros,  Pre
      same.  If they are, it returns that mode.  If they are different,
      it returns 'VOIDmode'.
 
-
-File: gccint.info,  Node: Cond Exec Macros,  Prev: MODE_CC Condition Codes,  Up: Condition Code
-
-17.16.3 Macros to control conditional execution
------------------------------------------------
-
-There is one macro that may need to be defined for targets supporting
-conditional execution, independent of how they represent conditional
-branches.
+ -- Target Hook: unsigned int TARGET_FLAGS_REGNUM
+     If the target has a dedicated flags register, and it needs to use
+     the post-reload comparison elimination pass, then this value should
+     be set appropriately.
 
 
 File: gccint.info,  Node: Costs,  Next: Scheduling,  Prev: Condition Code,  Up: Target Macros
@@ -36787,16 +36868,8 @@ Here are several miscellaneous parameters.
      by 'TARGET_INIT_BUILTINS'.  FNDECL is the declaration of the
      built-in function.  N_ARGS is the number of arguments passed to the
      function; the arguments themselves are pointed to by ARGP.  The
-     result is another tree, valid for both GIMPLE and GENERIC,
-     containing a simplified expression for the call's result.  If
-     IGNORE is true the value will be ignored.
-
- -- Target Hook: bool TARGET_GIMPLE_FOLD_BUILTIN (gimple_stmt_iterator
-          *GSI)
-     Fold a call to a machine specific built-in function that was set up
-     by 'TARGET_INIT_BUILTINS'.  GSI points to the gimple statement
-     holding the function call.  Returns true if any change was made to
-     the GIMPLE stream.
+     result is another tree containing a simplified expression for the
+     call's result.  If IGNORE is true the value will be ignored.
 
  -- Target Hook: int TARGET_COMPARE_VERSION_PRIORITY (tree DECL1, tree
           DECL2)
@@ -45468,7 +45541,7 @@ Concept Index
 * BLOCK_FOR_INSN, gimple_bb:             Maintaining the CFG.
                                                              (line   28)
 * BLOCK_REG_PADDING:                     Register Arguments. (line  228)
-* bool:                                  Misc.               (line  866)
+* bool:                                  Misc.               (line  858)
 * BOOLEAN_TYPE:                          Types.              (line    6)
 * BOOL_TYPE_SIZE:                        Type Layout.        (line   43)
 * branch prediction:                     Profile information.
@@ -45537,7 +45610,7 @@ Concept Index
 * 'call_insn' and '/v':                  Flags.              (line   44)
 * CALL_INSN_FUNCTION_USAGE:              Insns.              (line  101)
 * 'call_pop' instruction pattern:        Standard Names.     (line 1129)
-* CALL_POPS_ARGS:                        Stack Arguments.    (line  132)
+* CALL_POPS_ARGS:                        Stack Arguments.    (line  138)
 * CALL_REALLY_USED_REGISTERS:            Register Basics.    (line   45)
 * CALL_USED_REGISTERS:                   Register Basics.    (line   34)
 * call_used_regs:                        Register Basics.    (line   59)
@@ -45632,7 +45705,7 @@ Concept Index
 * CODE_LABEL_NUMBER:                     Insns.              (line  125)
 * COImode:                               Machine Modes.      (line  201)
 * COLLECT2_HOST_INITIALIZATION:          Host Misc.          (line   32)
-* COLLECT_EXPORT_LIST:                   Misc.               (line  766)
+* COLLECT_EXPORT_LIST:                   Misc.               (line  758)
 * COLLECT_SHARED_FINI_FUNC:              Macros for Initialization.
                                                              (line   43)
 * COLLECT_SHARED_INIT_FUNC:              Macros for Initialization.
@@ -45674,7 +45747,6 @@ Concept Index
 * condition codes:                       Comparisons.        (line   20)
 * conditional execution:                 Conditional Execution.
                                                              (line    6)
-* conditional execution <1>:             Cond Exec Macros.   (line    6)
 * Conditional Expressions:               Conditional Expressions.
                                                              (line    6)
 * conditions, in patterns:               Patterns.           (line   43)
@@ -45787,7 +45859,7 @@ Concept Index
 * current_function_is_leaf:              Leaf Functions.     (line   50)
 * current_function_uses_only_leaf_regs:  Leaf Functions.     (line   50)
 * current_insn_predicate:                Conditional Execution.
-                                                             (line   27)
+                                                             (line   26)
 * C_COMMON_OVERRIDE_OPTIONS:             Run-time Target.    (line  136)
 * c_register_pragma:                     Misc.               (line  399)
 * c_register_pragma_with_expansion:      Misc.               (line  401)
@@ -46913,6 +46985,7 @@ Concept Index
 * inclusive-or, bitwise:                 Arithmetic.         (line  164)
 * INCOMING_FRAME_SP_OFFSET:              Frame Layout.       (line  181)
 * INCOMING_REGNO:                        Register Basics.    (line   87)
+* INCOMING_REG_PARM_STACK_SPACE:         Stack Arguments.    (line   73)
 * INCOMING_RETURN_ADDR_RTX:              Frame Layout.       (line  137)
 * INCOMING_STACK_BOUNDARY:               Storage Layout.     (line  159)
 * INDEX_REG_CLASS:                       Register Classes.   (line  140)
@@ -47115,7 +47188,7 @@ Concept Index
 * LIBGCC2_HAS_TF_MODE:                   Type Layout.        (line  121)
 * LIBGCC2_HAS_XF_MODE:                   Type Layout.        (line  115)
 * LIBGCC2_LONG_DOUBLE_TYPE_SIZE:         Type Layout.        (line  102)
-* LIBGCC2_UNWIND_ATTRIBUTE:              Misc.               (line  971)
+* LIBGCC2_UNWIND_ATTRIBUTE:              Misc.               (line  963)
 * LIBGCC_SPEC:                           Driver.             (line  115)
 * library subroutine names:              Library Calls.      (line    6)
 * LIBRARY_PATH_ENV:                      Misc.               (line  501)
@@ -47237,7 +47310,7 @@ Concept Index
 * maybe_undef:                           GTY Options.        (line  186)
 * may_trap_p, tree_could_trap_p:         Edges.              (line  114)
 * mcount:                                Profiling.          (line   12)
-* MD_CAN_REDIRECT_BRANCH:                Misc.               (line  686)
+* MD_CAN_REDIRECT_BRANCH:                Misc.               (line  678)
 * MD_EXEC_PREFIX:                        Driver.             (line  267)
 * MD_FALLBACK_FRAME_STATE_FOR:           Exception Handling. (line   93)
 * MD_HANDLE_UNWABI:                      Exception Handling. (line  112)
@@ -47320,7 +47393,7 @@ Concept Index
 * modifiers in constraints:              Modifiers.          (line    6)
 * MODIFY_EXPR:                           Unary and Binary Expressions.
                                                              (line    6)
-* MODIFY_JNI_METHOD_CALL:                Misc.               (line  773)
+* MODIFY_JNI_METHOD_CALL:                Misc.               (line  765)
 * 'modM3' instruction pattern:           Standard Names.     (line  266)
 * modulo scheduling:                     RTL passes.         (line  131)
 * MOVE_BY_PIECES_P:                      Costs.              (line  164)
@@ -47457,7 +47530,7 @@ Concept Index
 * N_REG_CLASSES:                         Register Classes.   (line   81)
 * 'o' in constraint:                     Simple Constraints. (line   23)
 * OBJC_GEN_METHOD_LABEL:                 Label Output.       (line  447)
-* OBJC_JBLEN:                            Misc.               (line  966)
+* OBJC_JBLEN:                            Misc.               (line  958)
 * OBJECT_FORMAT_COFF:                    Macros for Initialization.
                                                              (line   96)
 * offsettable address:                   Simple Constraints. (line   23)
@@ -47504,7 +47577,7 @@ Concept Index
 * other register constraints:            Simple Constraints. (line  171)
 * outgoing_args_size:                    Stack Arguments.    (line   48)
 * OUTGOING_REGNO:                        Register Basics.    (line   94)
-* OUTGOING_REG_PARM_STACK_SPACE:         Stack Arguments.    (line   73)
+* OUTGOING_REG_PARM_STACK_SPACE:         Stack Arguments.    (line   79)
 * output of assembler code:              File Framework.     (line    6)
 * output statements:                     Output Statement.   (line    6)
 * output templates:                      Output Template.    (line    6)
@@ -47596,7 +47669,7 @@ Concept Index
 * post_modify:                           Incdec.             (line   33)
 * post_order_compute, inverted_post_order_compute, walk_dominator_tree: Basic Blocks.
                                                              (line   34)
-* POWI_MAX_MULTS:                        Misc.               (line  835)
+* POWI_MAX_MULTS:                        Misc.               (line  827)
 * 'powM3' instruction pattern:           Standard Names.     (line  603)
 * pragma:                                Misc.               (line  379)
 * PREDECREMENT_EXPR:                     Unary and Binary Expressions.
@@ -47606,7 +47679,6 @@ Concept Index
 * predicates and machine modes:          Predicates.         (line   31)
 * predication:                           Conditional Execution.
                                                              (line    6)
-* predication <1>:                       Cond Exec Macros.   (line    6)
 * predict.def:                           Profile information.
                                                              (line   24)
 * PREFERRED_DEBUGGING_TYPE:              All Debuggers.      (line   41)
@@ -47851,9 +47923,9 @@ Concept Index
 * reverse probability:                   Profile information.
                                                              (line   66)
 * REVERSE_CONDITION:                     MODE_CC Condition Codes.
-                                                             (line   91)
+                                                             (line   93)
 * REVERSIBLE_CC_MODE:                    MODE_CC Condition Codes.
-                                                             (line   77)
+                                                             (line   78)
 * right rotate:                          Arithmetic.         (line  196)
 * right shift:                           Arithmetic.         (line  191)
 * 'rintM2' instruction pattern:          Standard Names.     (line  662)
@@ -48071,7 +48143,7 @@ Concept Index
 * 'STACK_DYNAMIC_OFFSET' and virtual registers: Regs and Memory.
                                                              (line   83)
 * STACK_GROWS_DOWNWARD:                  Frame Layout.       (line    8)
-* STACK_PARMS_IN_REG_PARM_AREA:          Stack Arguments.    (line   83)
+* STACK_PARMS_IN_REG_PARM_AREA:          Stack Arguments.    (line   89)
 * STACK_POINTER_OFFSET:                  Frame Layout.       (line   57)
 * 'STACK_POINTER_OFFSET' and virtual registers: Regs and Memory.
                                                              (line   93)
@@ -48240,14 +48312,14 @@ Concept Index
 * TARGET_ADDR_SPACE_VALID_POINTER_MODE:  Named Address Spaces.
                                                              (line   50)
 * TARGET_ALIGN_ANON_BITFIELD:            Storage Layout.     (line  394)
-* TARGET_ALLOCATE_INITIAL_VALUE:         Misc.               (line  709)
-* TARGET_ALLOCATE_STACK_SLOTS_FOR_ARGS:  Misc.               (line  988)
+* TARGET_ALLOCATE_INITIAL_VALUE:         Misc.               (line  701)
+* TARGET_ALLOCATE_STACK_SLOTS_FOR_ARGS:  Misc.               (line  980)
 * TARGET_ALWAYS_STRIP_DOTDOT:            Driver.             (line  246)
 * TARGET_ARG_PARTIAL_BYTES:              Register Arguments. (line   81)
 * TARGET_ARM_EABI_UNWINDER:              Exception Region Output.
                                                              (line  127)
 * TARGET_ARRAY_MODE_SUPPORTED_P:         Register Arguments. (line  333)
-* TARGET_ASAN_SHADOW_OFFSET:             Misc.               (line 1016)
+* TARGET_ASAN_SHADOW_OFFSET:             Misc.               (line 1008)
 * TARGET_ASM_ALIGNED_DI_OP:              Data Output.        (line    9)
 * TARGET_ASM_ALIGNED_HI_OP:              Data Output.        (line    7)
 * TARGET_ASM_ALIGNED_SI_OP:              Data Output.        (line    8)
@@ -48317,12 +48389,12 @@ Concept Index
 * TARGET_ASM_UNIQUE_SECTION:             Sections.           (line  201)
 * TARGET_ASM_UNWIND_EMIT:                Dispatch Tables.    (line   87)
 * TARGET_ASM_UNWIND_EMIT_BEFORE_INSN:    Dispatch Tables.    (line   92)
-* TARGET_ATOMIC_TEST_AND_SET_TRUEVAL:    Misc.               (line 1026)
+* TARGET_ATOMIC_TEST_AND_SET_TRUEVAL:    Misc.               (line 1018)
 * TARGET_ATTRIBUTE_TABLE:                Target Attributes.  (line   10)
 * TARGET_ATTRIBUTE_TAKES_IDENTIFIER_P:   Target Attributes.  (line   17)
 * TARGET_BINDS_LOCAL_P:                  Sections.           (line  308)
-* TARGET_BRANCH_TARGET_REGISTER_CALLEE_SAVED: Misc.          (line  806)
-* TARGET_BRANCH_TARGET_REGISTER_CLASS:   Misc.               (line  799)
+* TARGET_BRANCH_TARGET_REGISTER_CALLEE_SAVED: Misc.          (line  798)
+* TARGET_BRANCH_TARGET_REGISTER_CLASS:   Misc.               (line  791)
 * TARGET_BUILD_BUILTIN_VA_LIST:          Register Arguments. (line  271)
 * TARGET_BUILTIN_DECL:                   Misc.               (line  595)
 * TARGET_BUILTIN_RECIPROCAL:             Addressing Modes.   (line  261)
@@ -48330,27 +48402,27 @@ Concept Index
 * TARGET_C99_FUNCTIONS:                  Library Calls.      (line   70)
 * TARGET_CALLEE_COPIES:                  Register Arguments. (line  113)
 * TARGET_CANNOT_FORCE_CONST_MEM:         Addressing Modes.   (line  234)
-* TARGET_CANNOT_MODIFY_JUMPS_P:          Misc.               (line  786)
+* TARGET_CANNOT_MODIFY_JUMPS_P:          Misc.               (line  778)
 * TARGET_CANONICALIZE_COMPARISON:        MODE_CC Condition Codes.
-                                                             (line   54)
+                                                             (line   55)
 * TARGET_CANONICAL_VA_LIST_TYPE:         Register Arguments. (line  292)
 * TARGET_CAN_ELIMINATE:                  Elimination.        (line   73)
-* TARGET_CAN_FOLLOW_JUMP:                Misc.               (line  695)
+* TARGET_CAN_FOLLOW_JUMP:                Misc.               (line  687)
 * TARGET_CAN_INLINE_P:                   Target Attributes.  (line  157)
 * TARGET_CASE_VALUES_THRESHOLD:          Misc.               (line   46)
 * TARGET_CC_MODES_COMPATIBLE:            MODE_CC Condition Codes.
-                                                             (line  119)
+                                                             (line  121)
 * TARGET_CHECK_PCH_TARGET_FLAGS:         PCH Target.         (line   26)
 * TARGET_CHECK_STRING_OBJECT_FORMAT_ARG: Run-time Target.    (line  119)
 * TARGET_CLASS_LIKELY_SPILLED_P:         Register Classes.   (line  489)
 * TARGET_CLASS_MAX_NREGS:                Register Classes.   (line  505)
-* TARGET_COMMUTATIVE_P:                  Misc.               (line  702)
-* TARGET_COMPARE_VERSION_PRIORITY:       Misc.               (line  644)
+* TARGET_COMMUTATIVE_P:                  Misc.               (line  694)
+* TARGET_COMPARE_VERSION_PRIORITY:       Misc.               (line  636)
 * TARGET_COMP_TYPE_ATTRIBUTES:           Target Attributes.  (line   25)
 * TARGET_CONDITIONAL_REGISTER_USAGE:     Register Basics.    (line   59)
-* TARGET_CONST_ANCHOR:                   Misc.               (line  999)
+* TARGET_CONST_ANCHOR:                   Misc.               (line  991)
 * TARGET_CONST_NOT_OK_FOR_DEBUG_P:       Addressing Modes.   (line  230)
-* TARGET_CONVERT_TO_TYPE:                Misc.               (line  953)
+* TARGET_CONVERT_TO_TYPE:                Misc.               (line  945)
 * TARGET_CPU_CPP_BUILTINS:               Run-time Target.    (line    8)
 * TARGET_CXX_ADJUST_CLASS_AT_DEFINITION: C++ ABI.            (line   86)
 * TARGET_CXX_CDTOR_RETURNS_THIS:         C++ ABI.            (line   37)
@@ -48401,25 +48473,26 @@ Concept Index
 * TARGET_ENUM_VA_LIST_P:                 Register Arguments. (line  275)
 * TARGET_EXCEPT_UNWIND_INFO:             Exception Region Output.
                                                              (line   45)
-* TARGET_EXECUTABLE_SUFFIX:              Misc.               (line  760)
+* TARGET_EXECUTABLE_SUFFIX:              Misc.               (line  752)
 * TARGET_EXPAND_BUILTIN:                 Misc.               (line  605)
 * TARGET_EXPAND_BUILTIN_SAVEREGS:        Varargs.            (line   64)
 * TARGET_EXPAND_TO_RTL_HOOK:             Storage Layout.     (line  524)
 * TARGET_EXPR:                           Unary and Binary Expressions.
                                                              (line    6)
-* TARGET_EXTRA_INCLUDES:                 Misc.               (line  845)
+* TARGET_EXTRA_INCLUDES:                 Misc.               (line  837)
 * TARGET_EXTRA_LIVE_ON_ENTRY:            Tail Calls.         (line   20)
-* TARGET_EXTRA_PRE_INCLUDES:             Misc.               (line  852)
+* TARGET_EXTRA_PRE_INCLUDES:             Misc.               (line  844)
 * TARGET_FIXED_CONDITION_CODE_REGS:      MODE_CC Condition Codes.
-                                                             (line  104)
+                                                             (line  106)
 * TARGET_FIXED_POINT_SUPPORTED_P:        Storage Layout.     (line  521)
 * target_flags:                          Run-time Target.    (line   51)
-* TARGET_FLAGS_REGNUM:                   Register Arguments. (line  391)
+* TARGET_FLAGS_REGNUM:                   MODE_CC Condition Codes.
+                                                             (line  134)
 * TARGET_FLT_EVAL_METHOD:                Type Layout.        (line  147)
 * TARGET_FN_ABI_VA_LIST:                 Register Arguments. (line  287)
 * TARGET_FOLD_BUILTIN:                   Misc.               (line  627)
 * TARGET_FORCE_AT_COMP_DIR:              SDB and DWARF.      (line   60)
-* TARGET_FORMAT_TYPES:                   Misc.               (line  873)
+* TARGET_FORMAT_TYPES:                   Misc.               (line  865)
 * TARGET_FRAME_POINTER_REQUIRED:         Elimination.        (line    8)
 * TARGET_FUNCTION_ARG:                   Register Arguments. (line   10)
 * TARGET_FUNCTION_ARG_ADVANCE:           Register Arguments. (line  184)
@@ -48430,20 +48503,19 @@ Concept Index
 * TARGET_FUNCTION_OK_FOR_SIBCALL:        Tail Calls.         (line    6)
 * TARGET_FUNCTION_VALUE:                 Scalar Return.      (line    9)
 * TARGET_FUNCTION_VALUE_REGNO_P:         Scalar Return.      (line   96)
-* TARGET_GENERATE_VERSION_DISPATCHER_BODY: Misc.             (line  660)
-* TARGET_GET_DRAP_RTX:                   Misc.               (line  982)
-* TARGET_GET_FUNCTION_VERSIONS_DISPATCHER: Misc.             (line  653)
+* TARGET_GENERATE_VERSION_DISPATCHER_BODY: Misc.             (line  652)
+* TARGET_GET_DRAP_RTX:                   Misc.               (line  974)
+* TARGET_GET_FUNCTION_VERSIONS_DISPATCHER: Misc.             (line  645)
 * TARGET_GET_PCH_VALIDITY:               PCH Target.         (line    6)
 * TARGET_GET_RAW_ARG_MODE:               Aggregate Return.   (line   82)
 * TARGET_GET_RAW_RESULT_MODE:            Aggregate Return.   (line   76)
-* TARGET_GIMPLE_FOLD_BUILTIN:            Misc.               (line  637)
 * TARGET_GIMPLIFY_VA_ARG_EXPR:           Register Arguments. (line  297)
 * TARGET_HANDLE_C_OPTION:                Run-time Target.    (line   73)
 * TARGET_HANDLE_OPTION:                  Run-time Target.    (line   59)
 * TARGET_HARD_REGNO_SCRATCH_OK:          Values in Registers.
                                                              (line  141)
 * TARGET_HAS_SINCOS:                     Library Calls.      (line   78)
-* TARGET_HAVE_CONDITIONAL_EXECUTION:     Misc.               (line  820)
+* TARGET_HAVE_CONDITIONAL_EXECUTION:     Misc.               (line  812)
 * TARGET_HAVE_CTORS_DTORS:               Macros for Initialization.
                                                              (line   63)
 * TARGET_HAVE_NAMED_SECTIONS:            File Framework.     (line  139)
@@ -48456,16 +48528,16 @@ Concept Index
 * TARGET_INIT_LIBFUNCS:                  Library Calls.      (line   15)
 * TARGET_INSERT_ATTRIBUTES:              Target Attributes.  (line   80)
 * TARGET_INSTANTIATE_DECLS:              Storage Layout.     (line  532)
-* TARGET_INVALID_ARG_FOR_UNPROTOTYPED_FN: Misc.              (line  906)
-* TARGET_INVALID_BINARY_OP:              Misc.               (line  925)
-* TARGET_INVALID_CONVERSION:             Misc.               (line  912)
-* TARGET_INVALID_PARAMETER_TYPE:         Misc.               (line  931)
-* TARGET_INVALID_RETURN_TYPE:            Misc.               (line  938)
-* TARGET_INVALID_UNARY_OP:               Misc.               (line  918)
-* TARGET_INVALID_WITHIN_DOLOOP:          Misc.               (line  667)
+* TARGET_INVALID_ARG_FOR_UNPROTOTYPED_FN: Misc.              (line  898)
+* TARGET_INVALID_BINARY_OP:              Misc.               (line  917)
+* TARGET_INVALID_CONVERSION:             Misc.               (line  904)
+* TARGET_INVALID_PARAMETER_TYPE:         Misc.               (line  923)
+* TARGET_INVALID_RETURN_TYPE:            Misc.               (line  930)
+* TARGET_INVALID_UNARY_OP:               Misc.               (line  910)
+* TARGET_INVALID_WITHIN_DOLOOP:          Misc.               (line  659)
 * TARGET_IN_SMALL_DATA_P:                Sections.           (line  293)
 * TARGET_LEGITIMATE_ADDRESS_P:           Addressing Modes.   (line   48)
-* TARGET_LEGITIMATE_COMBINED_INSN:       Misc.               (line  681)
+* TARGET_LEGITIMATE_COMBINED_INSN:       Misc.               (line  673)
 * TARGET_LEGITIMATE_CONSTANT_P:          Addressing Modes.   (line  213)
 * TARGET_LEGITIMIZE_ADDRESS:             Addressing Modes.   (line  129)
 * TARGET_LIBCALL_VALUE:                  Scalar Return.      (line   65)
@@ -48474,7 +48546,7 @@ Concept Index
 * TARGET_LIBGCC_SDATA_SECTION:           Sections.           (line  131)
 * TARGET_LIBGCC_SHIFT_COUNT_MODE:        Storage Layout.     (line  461)
 * TARGET_LIB_INT_CMP_BIASED:             Library Calls.      (line   42)
-* TARGET_LOOP_UNROLL_ADJUST:             Misc.               (line  826)
+* TARGET_LOOP_UNROLL_ADJUST:             Misc.               (line  818)
 * TARGET_LRA_P:                          Register Classes.   (line  548)
 * TARGET_MACHINE_DEPENDENT_REORG:        Misc.               (line  564)
 * TARGET_MANGLE_ASSEMBLER_NAME:          Label Output.       (line  321)
@@ -48483,7 +48555,7 @@ Concept Index
 * TARGET_MAX_ANCHOR_OFFSET:              Anchored Addresses. (line   38)
 * TARGET_MD_ASM_CLOBBERS:                Misc.               (line  483)
 * TARGET_MEMBER_TYPE_FORCES_BLK:         Storage Layout.     (line  407)
-* TARGET_MEMMODEL_CHECK:                 Misc.               (line 1021)
+* TARGET_MEMMODEL_CHECK:                 Misc.               (line 1013)
 * TARGET_MEMORY_MOVE_COST:               Costs.              (line   79)
 * TARGET_MEM_CONSTRAINT:                 Addressing Modes.   (line  107)
 * TARGET_MEM_REF:                        Storage References. (line    6)
@@ -48498,14 +48570,14 @@ Concept Index
 * 'TARGET_MUST_PASS_IN_STACK', and 'TARGET_FUNCTION_ARG': Register Arguments.
                                                              (line   50)
 * TARGET_NARROW_VOLATILE_BITFIELD:       Storage Layout.     (line  400)
-* TARGET_N_FORMAT_TYPES:                 Misc.               (line  878)
+* TARGET_N_FORMAT_TYPES:                 Misc.               (line  870)
 * TARGET_OBJC_CONSTRUCT_STRING_OBJECT:   Run-time Target.    (line   88)
 * TARGET_OBJC_DECLARE_CLASS_DEFINITION:  Run-time Target.    (line  109)
 * TARGET_OBJC_DECLARE_UNRESOLVED_CLASS_REFERENCE: Run-time Target.
                                                              (line  104)
-* TARGET_OBJECT_SUFFIX:                  Misc.               (line  755)
+* TARGET_OBJECT_SUFFIX:                  Misc.               (line  747)
 * TARGET_OBJFMT_CPP_BUILTINS:            Run-time Target.    (line   45)
-* TARGET_OPTF:                           Misc.               (line  860)
+* TARGET_OPTF:                           Misc.               (line  852)
 * TARGET_OPTION_DEFAULT_PARAMS:          Run-time Target.    (line  160)
 * TARGET_OPTION_FUNCTION_VERSIONS:       Target Attributes.  (line  149)
 * TARGET_OPTION_INIT_STRUCT:             Run-time Target.    (line  156)
@@ -48517,9 +48589,9 @@ Concept Index
 * TARGET_OPTION_SAVE:                    Target Attributes.  (line  112)
 * TARGET_OPTION_VALID_ATTRIBUTE_P:       Target Attributes.  (line  100)
 * TARGET_OS_CPP_BUILTINS:                Run-time Target.    (line   41)
-* TARGET_OVERRIDES_FORMAT_ATTRIBUTES:    Misc.               (line  882)
-* TARGET_OVERRIDES_FORMAT_ATTRIBUTES_COUNT: Misc.            (line  888)
-* TARGET_OVERRIDES_FORMAT_INIT:          Misc.               (line  892)
+* TARGET_OVERRIDES_FORMAT_ATTRIBUTES:    Misc.               (line  874)
+* TARGET_OVERRIDES_FORMAT_ATTRIBUTES_COUNT: Misc.            (line  880)
+* TARGET_OVERRIDES_FORMAT_INIT:          Misc.               (line  884)
 * TARGET_OVERRIDE_OPTIONS_AFTER_CHANGE:  Run-time Target.    (line  126)
 * TARGET_PASS_BY_REFERENCE:              Register Arguments. (line  101)
 * TARGET_PCH_VALID_P:                    PCH Target.         (line   11)
@@ -48530,18 +48602,18 @@ Concept Index
 * TARGET_PREPARE_PCH_SAVE:               PCH Target.         (line   34)
 * TARGET_PRETEND_OUTGOING_VARARGS_NAMED: Varargs.            (line  123)
 * TARGET_PROFILE_BEFORE_PROLOGUE:        Sections.           (line  301)
-* TARGET_PROMOTED_TYPE:                  Misc.               (line  945)
+* TARGET_PROMOTED_TYPE:                  Misc.               (line  937)
 * TARGET_PROMOTE_FUNCTION_MODE:          Storage Layout.     (line  114)
 * TARGET_PROMOTE_PROTOTYPES:             Stack Arguments.    (line   10)
 * TARGET_PTRMEMFUNC_VBIT_LOCATION:       Type Layout.        (line  293)
 * TARGET_REF_MAY_ALIAS_ERRNO:            Register Arguments. (line  308)
 * TARGET_REGISTER_MOVE_COST:             Costs.              (line   31)
 * TARGET_REGISTER_PRIORITY:              Register Classes.   (line  553)
-* TARGET_RELAXED_ORDERING:               Misc.               (line  897)
+* TARGET_RELAXED_ORDERING:               Misc.               (line  889)
 * TARGET_RESOLVE_OVERLOADED_BUILTIN:     Misc.               (line  616)
 * TARGET_RETURN_IN_MEMORY:               Aggregate Return.   (line   15)
 * TARGET_RETURN_IN_MSB:                  Scalar Return.      (line  117)
-* TARGET_RETURN_POPS_ARGS:               Stack Arguments.    (line   92)
+* TARGET_RETURN_POPS_ARGS:               Stack Arguments.    (line   98)
 * TARGET_RTX_COSTS:                      Costs.              (line  269)
 * TARGET_SCALAR_MODE_SUPPORTED_P:        Register Arguments. (line  315)
 * TARGET_SCHED_ADJUST_COST:              Scheduling.         (line   35)
@@ -48593,7 +48665,7 @@ Concept Index
 * TARGET_SECONDARY_RELOAD:               Register Classes.   (line  312)
 * TARGET_SECTION_TYPE_FLAGS:             File Framework.     (line  149)
 * TARGET_SETUP_INCOMING_VARARGS:         Varargs.            (line   71)
-* TARGET_SET_CURRENT_FUNCTION:           Misc.               (line  737)
+* TARGET_SET_CURRENT_FUNCTION:           Misc.               (line  729)
 * TARGET_SET_DEFAULT_TYPE_ATTRIBUTES:    Target Attributes.  (line   33)
 * TARGET_SET_UP_BY_PROLOGUE:             Tail Calls.         (line   29)
 * TARGET_SHIFT_TRUNCATION_MASK:          Misc.               (line  138)
@@ -48617,16 +48689,16 @@ Concept Index
                                                              (line   98)
 * TARGET_TRAMPOLINE_ADJUST_ADDRESS:      Trampolines.        (line   74)
 * TARGET_TRAMPOLINE_INIT:                Trampolines.        (line   54)
-* TARGET_UNSPEC_MAY_TRAP_P:              Misc.               (line  728)
+* TARGET_UNSPEC_MAY_TRAP_P:              Misc.               (line  720)
 * TARGET_UNWIND_TABLES_DEFAULT:          Exception Region Output.
                                                              (line   72)
 * TARGET_UNWIND_WORD_MODE:               Storage Layout.     (line  467)
-* TARGET_UPDATE_STACK_BOUNDARY:          Misc.               (line  978)
+* TARGET_UPDATE_STACK_BOUNDARY:          Misc.               (line  970)
 * TARGET_USES_WEAK_UNWIND_INFO:          Exception Handling. (line  123)
 * TARGET_USE_ANCHORS_FOR_SYMBOL_P:       Anchored Addresses. (line   53)
 * TARGET_USE_BLOCKS_FOR_CONSTANT_P:      Addressing Modes.   (line  248)
 * TARGET_USE_BLOCKS_FOR_DECL_P:          Addressing Modes.   (line  255)
-* TARGET_USE_JCR_SECTION:                Misc.               (line  960)
+* TARGET_USE_JCR_SECTION:                Misc.               (line  952)
 * TARGET_VALID_DLLIMPORT_ATTRIBUTE_P:    Target Attributes.  (line   66)
 * TARGET_VALID_POINTER_MODE:             Register Arguments. (line  303)
 * TARGET_VECTORIZE_ADD_STMT_COST:        Addressing Modes.   (line  367)
@@ -49132,372 +49204,371 @@ Concept Index
 
 Tag Table:
 Node: Top1789
-Node: Contributing4904
-Node: Portability5633
-Node: Interface7421
-Node: Libgcc10462
-Node: Integer library routines12289
-Node: Soft float library routines19131
-Node: Decimal float library routines31069
-Node: Fixed-point fractional library routines46827
-Node: Exception handling routines147223
-Node: Miscellaneous routines148330
-Node: Languages150450
-Node: Source Tree151997
-Node: Configure Terms152579
-Node: Top Level155535
-Node: gcc Directory159110
-Node: Subdirectories160062
-Node: Configuration162230
-Node: Config Fragments162950
-Node: System Config164175
-Node: Configuration Files165111
-Node: Build167928
-Node: Makefile168340
-Ref: Makefile-Footnote-1175144
-Ref: Makefile-Footnote-2175291
-Node: Library Files175365
-Node: Headers175927
-Node: Documentation178010
-Node: Texinfo Manuals178869
-Node: Man Page Generation181198
-Node: Miscellaneous Docs183111
-Node: Front End184498
-Node: Front End Directory188172
-Node: Front End Config189488
-Node: Front End Makefile192304
-Node: Back End196072
-Node: Testsuites199853
-Node: Test Idioms200784
-Node: Test Directives204182
-Node: Directives204709
-Node: Selectors215006
-Node: Effective-Target Keywords216362
-Ref: arm_neon_ok223916
-Ref: arm_neonv2_ok224074
-Ref: arm_neon_fp16_ok224246
-Node: Add Options234051
-Node: Require Support235248
-Node: Final Actions237755
-Node: Ada Tests242920
-Node: C Tests244251
-Node: libgcj Tests248646
-Node: LTO Testing249773
-Node: gcov Testing251421
-Node: profopt Testing254411
-Node: compat Testing256126
-Node: Torture Tests260366
-Node: Options261981
-Node: Option file format262422
-Node: Option properties269411
-Node: Passes282287
-Node: Parsing pass283027
-Node: Gimplification pass286555
-Node: Pass manager288388
-Node: Tree SSA passes290183
-Node: RTL passes312637
-Node: RTL325752
-Node: RTL Objects327933
-Node: RTL Classes331807
-Node: Accessors336804
-Node: Special Accessors339198
-Node: Flags344985
-Node: Machine Modes359711
-Node: Constants372021
-Node: Regs and Memory378749
-Node: Arithmetic396637
-Node: Comparisons406719
-Node: Bit-Fields411011
-Node: Vector Operations412563
-Node: Conversions414444
-Node: RTL Declarations418942
-Node: Side Effects419763
-Node: Incdec436357
-Node: Assembler439693
-Node: Debug Information441238
-Node: Insns442435
-Node: Calls468926
-Node: Sharing471519
-Node: Reading RTL474630
-Node: GENERIC475621
-Node: Deficiencies477492
-Node: Tree overview477733
-Node: Macros and Functions481857
-Node: Identifiers482682
-Node: Containers484291
-Node: Types485448
-Node: Declarations497522
-Node: Working with declarations498017
-Node: Internal structure503621
-Node: Current structure hierarchy504005
-Node: Adding new DECL node types506098
-Node: Attributes510170
-Node: Expression trees511414
-Node: Constant expressions513168
-Node: Storage References517381
-Node: Unary and Binary Expressions520900
-Node: Vectors540752
-Node: Statements545484
-Node: Basic Statements546004
-Node: Blocks550511
-Node: Statement Sequences551915
-Node: Empty Statements552248
-Node: Jumps552822
-Node: Cleanups553475
-Node: OpenMP555242
-Node: Functions561087
-Node: Function Basics561558
-Node: Function Properties565242
-Node: Language-dependent trees568023
-Node: C and C++ Trees568910
-Node: Types for C++571814
-Node: Namespaces576784
-Node: Classes579890
-Node: Functions for C++584967
-Node: Statements for C++591218
-Node: C++ Expressions599271
-Node: Java Trees600776
-Node: GIMPLE600889
-Node: Tuple representation604513
-Node: GIMPLE instruction set612817
-Node: GIMPLE Exception Handling614433
-Node: Temporaries616345
-Ref: Temporaries-Footnote-1617663
-Node: Operands617728
-Node: Compound Expressions618489
-Node: Compound Lvalues618723
-Node: Conditional Expressions619485
-Node: Logical Operators620144
-Node: Manipulating GIMPLE statements626900
-Node: Tuple specific accessors632836
-Node: 'GIMPLE_ASM'633655
-Node: 'GIMPLE_ASSIGN'636288
-Node: 'GIMPLE_BIND'640394
-Node: 'GIMPLE_CALL'642202
-Node: 'GIMPLE_CATCH'646473
-Node: 'GIMPLE_COND'647617
-Node: 'GIMPLE_DEBUG'650405
-Node: 'GIMPLE_EH_FILTER'653783
-Node: 'GIMPLE_LABEL'655271
-Node: 'GIMPLE_NOP'656246
-Node: 'GIMPLE_OMP_ATOMIC_LOAD'656615
-Node: 'GIMPLE_OMP_ATOMIC_STORE'657525
-Node: 'GIMPLE_OMP_CONTINUE'658165
-Node: 'GIMPLE_OMP_CRITICAL'659515
-Node: 'GIMPLE_OMP_FOR'660453
-Node: 'GIMPLE_OMP_MASTER'663968
-Node: 'GIMPLE_OMP_ORDERED'664352
-Node: 'GIMPLE_OMP_PARALLEL'664752
-Node: 'GIMPLE_OMP_RETURN'667524
-Node: 'GIMPLE_OMP_SECTION'668175
-Node: 'GIMPLE_OMP_SECTIONS'668841
-Node: 'GIMPLE_OMP_SINGLE'670448
-Node: 'GIMPLE_PHI'671386
-Node: 'GIMPLE_RESX'672673
-Node: 'GIMPLE_RETURN'673392
-Node: 'GIMPLE_SWITCH'673960
-Node: 'GIMPLE_TRY'675762
-Node: 'GIMPLE_WITH_CLEANUP_EXPR'677553
-Node: GIMPLE sequences678436
-Node: Sequence iterators681642
-Node: Adding a new GIMPLE statement code690097
-Node: Statement and operand traversals691373
-Node: Tree SSA693965
-Node: Annotations695782
-Node: SSA Operands696308
-Node: SSA710833
-Node: Alias analysis722953
-Node: Memory model726727
-Node: Loop Analysis and Representation728086
-Node: Loop representation729263
-Node: Loop querying736180
-Node: Loop manipulation738996
-Node: LCSSA741357
-Node: Scalar evolutions743426
-Node: loop-iv746670
-Node: Number of iterations748592
-Node: Dependency analysis751398
-Node: Lambda757763
-Node: Omega759435
-Node: Control Flow761000
-Node: Basic Blocks762776
-Node: Edges768065
-Node: Profile information776694
-Node: Maintaining the CFG781378
-Node: Liveness information787239
-Node: Machine Desc789365
-Node: Overview791908
-Node: Patterns793948
-Node: Example797386
-Node: RTL Template798820
-Node: Output Template809475
-Node: Output Statement813438
-Node: Predicates817777
-Node: Machine-Independent Predicates820695
-Node: Defining Predicates825639
-Node: Constraints831602
-Node: Simple Constraints833084
-Node: Multi-Alternative845924
-Node: Class Preferences848765
-Node: Modifiers849657
-Node: Machine Constraints853903
-Node: Disable Insn Alternatives904448
-Node: Define Constraints907352
-Node: C Constraint Interface914137
-Node: Standard Names917789
-Ref: shift patterns940333
-Ref: prologue instruction pattern985236
-Ref: window_save instruction pattern985729
-Ref: epilogue instruction pattern986006
-Node: Pattern Ordering1003592
-Node: Dependent Patterns1004828
-Node: Jump Patterns1006448
-Ref: Jump Patterns-Footnote-11008595
-Node: Looping Patterns1008643
-Node: Insn Canonicalizations1013372
-Node: Expander Definitions1017957
-Node: Insn Splitting1026171
-Node: Including Patterns1035774
-Node: Peephole Definitions1037558
-Node: define_peephole1038811
-Node: define_peephole21045141
-Node: Insn Attributes1048208
-Node: Defining Attributes1049314
-Ref: define_enum_attr1052529
-Node: Expressions1053565
-Node: Tagging Insns1060315
-Node: Attr Example1064668
-Node: Insn Lengths1067041
-Node: Constant Attributes1070100
-Node: Delay Slots1071269
-Node: Processor pipeline description1074493
-Ref: Processor pipeline description-Footnote-11093311
-Node: Conditional Execution1093635
-Node: Define Subst1097118
-Node: Define Subst Example1099154
-Node: Define Subst Pattern Matching1102148
-Node: Define Subst Output Template1103374
-Node: Constant Definitions1105444
-Ref: define_enum1109226
-Node: Iterators1109714
-Node: Mode Iterators1110292
-Node: Defining Mode Iterators1111270
-Node: Substitutions1112764
-Node: Examples1115006
-Node: Code Iterators1116454
-Node: Int Iterators1118733
-Node: Subst Iterators1121179
-Node: Target Macros1122871
-Node: Target Structure1125959
-Node: Driver1128075
-Node: Run-time Target1146860
-Node: Per-Function Data1156025
-Node: Storage Layout1158789
-Node: Type Layout1184844
-Node: Registers1200167
-Node: Register Basics1201141
-Node: Allocation Order1206649
-Node: Values in Registers1209095
-Node: Leaf Functions1216573
-Node: Stack Registers1219432
-Node: Register Classes1220704
-Node: Old Constraints1250671
-Node: Stack and Calling1257811
-Node: Frame Layout1258345
-Node: Exception Handling1269221
-Node: Stack Checking1275433
-Node: Frame Registers1280247
-Node: Elimination1288506
-Node: Stack Arguments1292736
-Node: Register Arguments1299599
-Node: Scalar Return1319902
-Node: Aggregate Return1325989
-Node: Caller Saves1330200
-Node: Function Entry1331377
-Node: Profiling1342471
-Node: Tail Calls1344170
-Node: Stack Smashing Protection1346073
-Node: Varargs1347701
-Node: Trampolines1354388
-Node: Library Calls1360431
-Node: Addressing Modes1365370
-Node: Anchored Addresses1385385
-Node: Condition Code1388028
-Node: CC0 Condition Codes1390157
-Node: MODE_CC Condition Codes1393403
-Node: Cond Exec Macros1399927
-Node: Costs1400273
-Node: Scheduling1416735
-Node: Sections1436152
-Node: PIC1451850
-Node: Assembler Format1453909
-Node: File Framework1455047
-Ref: TARGET_HAVE_SWITCHABLE_BSS_SECTIONS1461979
-Node: Data Output1465249
-Node: Uninitialized Data1473018
-Node: Label Output1478029
-Node: Initialization1500985
-Node: Macros for Initialization1506946
-Node: Instruction Output1513665
-Node: Dispatch Tables1524160
-Node: Exception Region Output1528538
-Node: Alignment Output1535216
-Node: Debugging Info1539762
-Node: All Debuggers1540432
-Node: DBX Options1543287
-Node: DBX Hooks1548725
-Node: File Names and DBX1550034
-Node: SDB and DWARF1552146
-Node: VMS Debug1558218
-Node: Floating Point1558805
-Node: Mode Switching1563281
-Node: Target Attributes1567277
-Node: Emulated TLS1575591
-Node: MIPS Coprocessors1578981
-Node: PCH Target1580278
-Node: C++ ABI1582120
-Node: Named Address Spaces1586914
-Node: Misc1591848
-Ref: TARGET_SHIFT_TRUNCATION_MASK1598590
-Node: Host Config1644112
-Node: Host Common1645180
-Node: Filesystem1647554
-Node: Host Misc1651669
-Node: Fragments1654118
-Node: Target Fragment1655313
-Node: Host Fragment1665941
-Node: Collect21666181
-Node: Header Dirs1668817
-Node: Type Information1670240
-Node: GTY Options1673459
-Node: User GC1687793
-Node: GGC Roots1691524
-Node: Files1692237
-Node: Invoking the garbage collector1694944
-Node: Troubleshooting1696449
-Node: Plugins1697524
-Node: Plugins loading1698642
-Node: Plugin API1699512
-Node: Plugins pass1706540
-Node: Plugins GC1708511
-Node: Plugins description1710176
-Node: Plugins attr1710712
-Node: Plugins recording1712599
-Node: Plugins gate1713449
-Node: Plugins tracking1714040
-Node: Plugins building1714628
-Node: LTO1716415
-Node: LTO Overview1717276
-Node: LTO object file layout1723108
-Node: IPA1727738
-Node: WHOPR1736703
-Node: Internal flags1741392
-Node: Funding1742604
-Node: GNU Project1745088
-Node: Copying1745737
-Node: GNU Free Documentation License1783249
-Node: Contributors1808370
-Node: Option Index1845771
-Node: Concept Index1846575
+Node: Contributing4891
+Node: Portability5620
+Node: Interface7408
+Node: Libgcc10449
+Node: Integer library routines12276
+Node: Soft float library routines19118
+Node: Decimal float library routines31056
+Node: Fixed-point fractional library routines46814
+Node: Exception handling routines147210
+Node: Miscellaneous routines148317
+Node: Languages150437
+Node: Source Tree151984
+Node: Configure Terms152566
+Node: Top Level155522
+Node: gcc Directory159097
+Node: Subdirectories160049
+Node: Configuration162217
+Node: Config Fragments162937
+Node: System Config164162
+Node: Configuration Files165098
+Node: Build167915
+Node: Makefile168327
+Ref: Makefile-Footnote-1175131
+Ref: Makefile-Footnote-2175278
+Node: Library Files175352
+Node: Headers175914
+Node: Documentation177997
+Node: Texinfo Manuals178856
+Node: Man Page Generation181185
+Node: Miscellaneous Docs183098
+Node: Front End184485
+Node: Front End Directory188159
+Node: Front End Config189475
+Node: Front End Makefile192291
+Node: Back End196059
+Node: Testsuites199840
+Node: Test Idioms200771
+Node: Test Directives204169
+Node: Directives204696
+Node: Selectors214993
+Node: Effective-Target Keywords216349
+Ref: arm_neon_ok223959
+Ref: arm_neonv2_ok224117
+Ref: arm_neon_fp16_ok224289
+Node: Add Options234664
+Node: Require Support235861
+Node: Final Actions238368
+Node: Ada Tests243533
+Node: C Tests244864
+Node: libgcj Tests249259
+Node: LTO Testing250386
+Node: gcov Testing252034
+Node: profopt Testing255024
+Node: compat Testing256739
+Node: Torture Tests260979
+Node: Options262594
+Node: Option file format263035
+Node: Option properties270024
+Node: Passes282900
+Node: Parsing pass283640
+Node: Gimplification pass287168
+Node: Pass manager289001
+Node: Tree SSA passes290796
+Node: RTL passes313250
+Node: RTL326365
+Node: RTL Objects328546
+Node: RTL Classes332420
+Node: Accessors337417
+Node: Special Accessors339811
+Node: Flags345598
+Node: Machine Modes360324
+Node: Constants372634
+Node: Regs and Memory379362
+Node: Arithmetic397250
+Node: Comparisons407332
+Node: Bit-Fields411624
+Node: Vector Operations413176
+Node: Conversions415057
+Node: RTL Declarations419555
+Node: Side Effects420376
+Node: Incdec436970
+Node: Assembler440306
+Node: Debug Information441851
+Node: Insns443048
+Node: Calls469539
+Node: Sharing472132
+Node: Reading RTL475243
+Node: GENERIC476234
+Node: Deficiencies478105
+Node: Tree overview478346
+Node: Macros and Functions482470
+Node: Identifiers483295
+Node: Containers484904
+Node: Types486061
+Node: Declarations498135
+Node: Working with declarations498630
+Node: Internal structure504234
+Node: Current structure hierarchy504618
+Node: Adding new DECL node types506711
+Node: Attributes510783
+Node: Expression trees512027
+Node: Constant expressions513781
+Node: Storage References517994
+Node: Unary and Binary Expressions521513
+Node: Vectors541365
+Node: Statements546097
+Node: Basic Statements546617
+Node: Blocks551124
+Node: Statement Sequences552528
+Node: Empty Statements552861
+Node: Jumps553435
+Node: Cleanups554088
+Node: OpenMP555855
+Node: Functions561700
+Node: Function Basics562171
+Node: Function Properties565855
+Node: Language-dependent trees568636
+Node: C and C++ Trees569523
+Node: Types for C++572427
+Node: Namespaces577397
+Node: Classes580503
+Node: Functions for C++585580
+Node: Statements for C++591831
+Node: C++ Expressions599884
+Node: Java Trees601389
+Node: GIMPLE601502
+Node: Tuple representation605126
+Node: GIMPLE instruction set613430
+Node: GIMPLE Exception Handling615046
+Node: Temporaries616958
+Ref: Temporaries-Footnote-1618276
+Node: Operands618341
+Node: Compound Expressions619102
+Node: Compound Lvalues619336
+Node: Conditional Expressions620098
+Node: Logical Operators620757
+Node: Manipulating GIMPLE statements627513
+Node: Tuple specific accessors633449
+Node: 'GIMPLE_ASM'634268
+Node: 'GIMPLE_ASSIGN'636901
+Node: 'GIMPLE_BIND'641007
+Node: 'GIMPLE_CALL'642815
+Node: 'GIMPLE_CATCH'647086
+Node: 'GIMPLE_COND'648230
+Node: 'GIMPLE_DEBUG'651018
+Node: 'GIMPLE_EH_FILTER'654396
+Node: 'GIMPLE_LABEL'655884
+Node: 'GIMPLE_NOP'656859
+Node: 'GIMPLE_OMP_ATOMIC_LOAD'657228
+Node: 'GIMPLE_OMP_ATOMIC_STORE'658138
+Node: 'GIMPLE_OMP_CONTINUE'658778
+Node: 'GIMPLE_OMP_CRITICAL'660128
+Node: 'GIMPLE_OMP_FOR'661066
+Node: 'GIMPLE_OMP_MASTER'664581
+Node: 'GIMPLE_OMP_ORDERED'664965
+Node: 'GIMPLE_OMP_PARALLEL'665365
+Node: 'GIMPLE_OMP_RETURN'668137
+Node: 'GIMPLE_OMP_SECTION'668788
+Node: 'GIMPLE_OMP_SECTIONS'669454
+Node: 'GIMPLE_OMP_SINGLE'671061
+Node: 'GIMPLE_PHI'671999
+Node: 'GIMPLE_RESX'673286
+Node: 'GIMPLE_RETURN'674005
+Node: 'GIMPLE_SWITCH'674573
+Node: 'GIMPLE_TRY'676375
+Node: 'GIMPLE_WITH_CLEANUP_EXPR'678166
+Node: GIMPLE sequences679049
+Node: Sequence iterators682255
+Node: Adding a new GIMPLE statement code690710
+Node: Statement and operand traversals691986
+Node: Tree SSA694578
+Node: Annotations696395
+Node: SSA Operands696921
+Node: SSA711446
+Node: Alias analysis723566
+Node: Memory model727340
+Node: Loop Analysis and Representation728699
+Node: Loop representation729876
+Node: Loop querying736793
+Node: Loop manipulation739609
+Node: LCSSA741970
+Node: Scalar evolutions744039
+Node: loop-iv747283
+Node: Number of iterations749205
+Node: Dependency analysis752011
+Node: Lambda758376
+Node: Omega760048
+Node: Control Flow761613
+Node: Basic Blocks763389
+Node: Edges768678
+Node: Profile information777307
+Node: Maintaining the CFG781991
+Node: Liveness information787852
+Node: Machine Desc789978
+Node: Overview792521
+Node: Patterns794561
+Node: Example797999
+Node: RTL Template799433
+Node: Output Template810088
+Node: Output Statement814051
+Node: Predicates818390
+Node: Machine-Independent Predicates821308
+Node: Defining Predicates826252
+Node: Constraints832215
+Node: Simple Constraints833697
+Node: Multi-Alternative846537
+Node: Class Preferences849378
+Node: Modifiers850270
+Node: Machine Constraints854516
+Node: Disable Insn Alternatives906786
+Node: Define Constraints909690
+Node: C Constraint Interface916475
+Node: Standard Names920127
+Ref: shift patterns942671
+Ref: prologue instruction pattern987574
+Ref: window_save instruction pattern988067
+Ref: epilogue instruction pattern988344
+Node: Pattern Ordering1005930
+Node: Dependent Patterns1007166
+Node: Jump Patterns1008786
+Ref: Jump Patterns-Footnote-11010933
+Node: Looping Patterns1010981
+Node: Insn Canonicalizations1015710
+Node: Expander Definitions1020295
+Node: Insn Splitting1028509
+Node: Including Patterns1038112
+Node: Peephole Definitions1039896
+Node: define_peephole1041149
+Node: define_peephole21047479
+Node: Insn Attributes1050546
+Node: Defining Attributes1051652
+Ref: define_enum_attr1054867
+Node: Expressions1055903
+Node: Tagging Insns1062653
+Node: Attr Example1067006
+Node: Insn Lengths1069379
+Node: Constant Attributes1072456
+Node: Delay Slots1073625
+Node: Processor pipeline description1076849
+Ref: Processor pipeline description-Footnote-11095667
+Node: Conditional Execution1095991
+Node: Define Subst1099054
+Node: Define Subst Example1101090
+Node: Define Subst Pattern Matching1104084
+Node: Define Subst Output Template1105310
+Node: Constant Definitions1107380
+Ref: define_enum1111162
+Node: Iterators1111650
+Node: Mode Iterators1112228
+Node: Defining Mode Iterators1113206
+Node: Substitutions1114700
+Node: Examples1116942
+Node: Code Iterators1118390
+Node: Int Iterators1120669
+Node: Subst Iterators1123130
+Node: Target Macros1124822
+Node: Target Structure1127910
+Node: Driver1130026
+Node: Run-time Target1148811
+Node: Per-Function Data1157976
+Node: Storage Layout1160740
+Node: Type Layout1186795
+Node: Registers1202118
+Node: Register Basics1203092
+Node: Allocation Order1208600
+Node: Values in Registers1211046
+Node: Leaf Functions1218524
+Node: Stack Registers1221383
+Node: Register Classes1222655
+Node: Old Constraints1252622
+Node: Stack and Calling1259762
+Node: Frame Layout1260296
+Node: Exception Handling1271172
+Node: Stack Checking1277384
+Node: Frame Registers1282198
+Node: Elimination1290457
+Node: Stack Arguments1294687
+Node: Register Arguments1301871
+Node: Scalar Return1321952
+Node: Aggregate Return1328039
+Node: Caller Saves1332250
+Node: Function Entry1333427
+Node: Profiling1344521
+Node: Tail Calls1346220
+Node: Stack Smashing Protection1348123
+Node: Varargs1349751
+Node: Trampolines1356438
+Node: Library Calls1362481
+Node: Addressing Modes1367420
+Node: Anchored Addresses1387435
+Node: Condition Code1390078
+Node: CC0 Condition Codes1392137
+Node: MODE_CC Condition Codes1395383
+Node: Costs1402253
+Node: Scheduling1418715
+Node: Sections1438132
+Node: PIC1453830
+Node: Assembler Format1455889
+Node: File Framework1457027
+Ref: TARGET_HAVE_SWITCHABLE_BSS_SECTIONS1463959
+Node: Data Output1467229
+Node: Uninitialized Data1474998
+Node: Label Output1480009
+Node: Initialization1502965
+Node: Macros for Initialization1508926
+Node: Instruction Output1515645
+Node: Dispatch Tables1526140
+Node: Exception Region Output1530518
+Node: Alignment Output1537196
+Node: Debugging Info1541742
+Node: All Debuggers1542412
+Node: DBX Options1545267
+Node: DBX Hooks1550705
+Node: File Names and DBX1552014
+Node: SDB and DWARF1554126
+Node: VMS Debug1560198
+Node: Floating Point1560785
+Node: Mode Switching1565261
+Node: Target Attributes1569257
+Node: Emulated TLS1577571
+Node: MIPS Coprocessors1580961
+Node: PCH Target1582258
+Node: C++ ABI1584100
+Node: Named Address Spaces1588894
+Node: Misc1593828
+Ref: TARGET_SHIFT_TRUNCATION_MASK1600570
+Node: Host Config1645726
+Node: Host Common1646794
+Node: Filesystem1649168
+Node: Host Misc1653283
+Node: Fragments1655732
+Node: Target Fragment1656927
+Node: Host Fragment1667555
+Node: Collect21667795
+Node: Header Dirs1670431
+Node: Type Information1671854
+Node: GTY Options1675073
+Node: User GC1689407
+Node: GGC Roots1693138
+Node: Files1693851
+Node: Invoking the garbage collector1696558
+Node: Troubleshooting1698063
+Node: Plugins1699138
+Node: Plugins loading1700256
+Node: Plugin API1701126
+Node: Plugins pass1708154
+Node: Plugins GC1710125
+Node: Plugins description1711790
+Node: Plugins attr1712326
+Node: Plugins recording1714213
+Node: Plugins gate1715063
+Node: Plugins tracking1715654
+Node: Plugins building1716242
+Node: LTO1718029
+Node: LTO Overview1718890
+Node: LTO object file layout1724722
+Node: IPA1729352
+Node: WHOPR1738317
+Node: Internal flags1743006
+Node: Funding1744218
+Node: GNU Project1746702
+Node: Copying1747351
+Node: GNU Free Documentation License1784863
+Node: Contributors1809984
+Node: Option Index1847385
+Node: Concept Index1848189
 
 End Tag Table
